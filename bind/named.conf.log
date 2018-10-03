@@ -1,0 +1,8 @@
+logging {
+	channel "request" {
+		file "/var/log/bind/queries.log" size 10m;
+		print-time yes;
+		print-category yes;
+	};
+	category queries { "request"; };
+};
