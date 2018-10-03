@@ -7,8 +7,23 @@
 # you're doing.
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "debian/contrib-stretch64"
-  config.vm.network "forwarded_port", guest: 53, host: 53, protocol: "udp"
-  config.vm.provision "shell", path: "provision.sh"
+  config.vm.define "bind" do |bind|
+
+    bind.vm.box = "debian/contrib-stretch64"
+    bind.vm.network "private_network", ip:"10.11.12.1"
+    bind.vm.network "forwarded_port", guest: 22, host: 2201, id:"ssh"
+    bind.vm.network "forwarded_port", guest: 53, host: 53, protocol: "udp"
+    bind.vm.provision "shell", path: "provisionBind.sh"
+
+  end
+
+  config.vm.define "client" do |client|
+
+    client.vm.box = "debian/contrib-stretch64"
+    client.vm.network "private_network", ip:"10.11.12.2"
+    client.vm.network "forwarded_port", guest: 22, host: 2202, id:"ssh"
+    client.vm.provision "shell", path: "provisionClient.sh"
+
+  end
 
 end
