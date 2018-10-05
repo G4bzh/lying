@@ -9,3 +9,4 @@ apt-get install bind9 dnsutils -y
 mkdir /var/log/bind
 chown bind:bind /var/log/bind
 echo 'include "/bind/named.conf.log";' >> /etc/bind/named.conf
+echo 'include "/bind/named.conf.zones";' >> /etc/bind/named.conf.local
