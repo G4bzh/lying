@@ -1,0 +1,11 @@
+; Global TTL
+$TTL 3600
+
+;                 NS    MAIL                  SERIAL      REFRESH   RETRY  EXPIRE  NEG
+@    IN    SOA    ns1   hostmaster.email.com  2018100501  1h        15m    30d     1h
+
+; NS
+@     IN    NS    ns1.foo.example.
+
+; Records
+www   IN    A       5.6.7.8

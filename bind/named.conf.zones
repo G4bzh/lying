@@ -1,1 +1,43 @@
 // Zones
+// when using 'view' statements, all zones must be in views
+// So comment "include "/etc/bind/named.conf.default-zones";" in named.conf
+
+
+acl "client"
+{
+  172.16.0.0/16;
+};
+
+acl "external"
+{
+  !"client";
+  any;
+};
+
+view client {
+  match-clients { client; };
+
+  forwarders {
+    8.8.8.8;
+  };
+
+  zone "google.com" {
+       type master;
+       file "/bind/zones/client.txt";
+  };
+
+};
+
+view external {
+  match-clients { external; };
+
+  forwarders {
+    1.1.1.1;
+  };
+
+  zone "google.com" {
+       type master;
+       file "/bind/zones/external.txt";
+  };
+
+};
