@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
     # Need admin privileges to bind <1024 ports
     bind.vm.network "forwarded_port", guest: 53, host: 53, protocol: "udp"
     bind.vm.network "forwarded_port", guest: 53, host: 53, protocol: "tcp"
-    config.vm.synced_folder "../bind", "/bind"
+    bind.vm.synced_folder "../bind", "/bind"
     bind.vm.provision "shell", path: "provisionBind.sh"
 
   end
@@ -26,6 +26,17 @@ Vagrant.configure("2") do |config|
     client.vm.network "private_network", ip:"172.16.12.2"
     client.vm.network "forwarded_port", guest: 22, host: 2202, id:"ssh"
     client.vm.provision "shell", path: "provisionClient.sh"
+
+  end
+
+  config.vm.define "graphql" do |graphql|
+
+    graphql.vm.box = "debian/contrib-stretch64"
+    graphql.vm.network "private_network", ip:"172.16.12.3"
+    graphql.vm.network "forwarded_port", guest: 22, host: 2203, id:"ssh"
+    graphql.vm.network "forwarded_port", guest: 4000, host: 4000, protocol: "tcp"
+    graphql.vm.synced_folder "../graphql", "/app", type: "smb"
+    graphql.vm.provision "shell", path: "provisionGraphql.sh"
 
   end
 
