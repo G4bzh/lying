@@ -16,6 +16,7 @@ acl "external"
 
 view client {
   match-clients { client; };
+  response-policy { zone "rpz"; };
 
   forwarders {
     8.8.8.8;
@@ -26,10 +27,16 @@ view client {
        file "/bind/zones/client.txt";
   };
 
+  zone "rpz" {
+       type master;
+       file "/bind/zones/client_rpz.txt";
+  };
+
 };
 
 view external {
   match-clients { external; };
+  response-policy { zone "rpz"; };
 
   forwarders {
     1.1.1.1;
@@ -38,6 +45,11 @@ view external {
   zone "google.com" {
        type master;
        file "/bind/zones/external.txt";
+  };
+
+  zone "rpz" {
+       type master;
+       file "/bind/zones/external_rpz.txt";
   };
 
 };
