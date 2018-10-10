@@ -29,14 +29,13 @@ Vagrant.configure("2") do |config|
 
   end
 
-  config.vm.define "graphql" do |graphql|
+  config.vm.define "rabbitmq" do |rabbitmq|
 
-    graphql.vm.box = "debian/contrib-stretch64"
-    graphql.vm.network "private_network", ip:"172.16.12.3"
-    graphql.vm.network "forwarded_port", guest: 22, host: 2203, id:"ssh"
-    graphql.vm.network "forwarded_port", guest: 4000, host: 4000, protocol: "tcp"
-    graphql.vm.synced_folder "../graphql", "/app", type: "smb"
-    graphql.vm.provision "shell", path: "provisionGraphql.sh"
+    rabbitmq.vm.box = "debian/contrib-stretch64"
+    rabbitmq.vm.network "private_network", ip:"172.16.12.3"
+    rabbitmq.vm.network "forwarded_port", guest: 22, host: 2203, id:"ssh"
+    rabbitmq.vm.network "forwarded_port", guest: 15672, host: 15672, protocol: "tcp"
+    rabbitmq.vm.provision "shell", path: "provisionrabbitmq.sh"
 
   end
 
