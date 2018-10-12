@@ -94,3 +94,58 @@ curl http://consul:8500/v1/catalog/service/redis?pretty
         "ModifyIndex": 468
     }
 ]
+
+docker service rm redis
+
+## Service
+
+docker service create  --name hello  --network saas --replicas 3 nginxdemos/hello:plain-text
+
+
+## Nginx
+
+# Create template
+
+
+
+# Run nginx
+
+# On manager
+mkdir nginx
+vi nginx/simple.conf
+
+  server {
+    listen 80;
+
+  }
+
+docker service create --name nginx -p 8500:80 --network saas --constraint=node.role==manager --mount type=bind,source=$PWD/nginx,target=/etc/nginx/conf.d nginx
+
+
+vi nginx/simple.ctmpl
+
+upstream helloservers {
+  {{range service "hello" "any"}}
+    server {{.Address}}:{{.Port}} ;
+  {{end}}
+}
+
+
+server {
+  listen 80;
+
+  location / {
+    proxy_pass  http://testhelloservers;
+    proxy_next_upstream error timeout invalid_header http_500;
+  }
+
+}
+
+
+docker service create  --name consul-tpl --network saas --constraint=node.role==manager -e CONSUL_TEMPLATE_LOG=debug  \
+--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock  \
+--mount type=bind,source=/usr/bin/docker,target=/usr/bin/docker  \
+--mount type=bind,source=$PWD/nginx,target=/tmp/nginx  \
+hashicorp/consul-template \
+-template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:/usr/bin/docker service update --force nginx" \
+-consul-addr consul:8500
