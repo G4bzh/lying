@@ -18,7 +18,7 @@ mkdir /var/consul
 # from within a container, docker ps thent docker exec -it <ID> /bin/sh
 curl http://consul:8500/v1/agent/members?pretty
 
-# Registrator
+## Registrator
 docker service create --name=registrator --network saas --mode global --mount type=bind,source=/var/run/docker.sock,target=/tmp/docker.sock gliderlabs/registrator:latest -internal consul://consul:8500
 
 # Test
@@ -59,3 +59,38 @@ curl http://consul:8500/v1/catalog/services?pretty
     ],
     "redis": []
 }
+
+
+curl http://consul:8500/v1/catalog/service/redis?pretty
+[
+    {
+        "ID": "b0e8b952-4701-9bff-c0ec-e8251b2af785",
+        "Node": "aa18b1acf6f8",
+        "Address": "1.0.0.8",
+        "Datacenter": "dc1",
+        "TaggedAddresses": {
+            "lan": "1.0.0.8",
+            "wan": "1.0.0.8"
+        },
+        "NodeMeta": {
+            "consul-network-segment": ""
+        },
+        "ServiceKind": "",
+        "ServiceID": "a8b0f19a2dc5:redis.1.zvr6nz3s3446pvtuy9cui09a7:6379",
+        "ServiceName": "redis",
+        "ServiceTags": [],
+        "ServiceAddress": "172.17.0.2",
+        "ServiceWeights": {
+            "Passing": 1,
+            "Warning": 1
+        },
+        "ServiceMeta": {},
+        "ServicePort": 6379,
+        "ServiceEnableTagOverride": false,
+        "ServiceProxyDestination": "",
+        "ServiceProxy": {},
+        "ServiceConnect": {},
+        "CreateIndex": 468,
+        "ModifyIndex": 468
+    }
+]
