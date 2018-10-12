@@ -21,6 +21,8 @@ apt-get install docker-ce -y
 # docker network create --subnet 1.0.0.0/8 --driver overlay saas
 
 # Consul Server
-# docker service create --name consul --network saas --mode global --env CONSUL_BIND_INTERFACE=eth0 --env CONSUL_CLIENT_INTERFACE=eth0 consul agent -server -bootstrap-expect=3  -retry-join=tasks.consul
+# On each node : mkdir /var/consul
+# docker service create --name consul --mode global --mount type=bind,source=/var/consul,target=/consul/data --network saas --env CONSUL_BIND_INTERFACE=eth0 --env CONSUL_CLIENT_INTERFACE=eth0 consul agent -server -bootstrap-expect=3  -retry-join=tasks.consul
 #
 # Test : curl http://consul:8500/v1/agent/members?pretty (from within a container, docker ps thent docker exec -it <ID> /bin/sh)
+# For vagrant only: docker service create --name proxy --network saas -e FRONTEND_PORT=8500 -e BACKENDS=consul:8500 -p 8500:8500 eeacms/haproxy (because Consul doesn't handle ingress with another network)
