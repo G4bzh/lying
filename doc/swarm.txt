@@ -1,0 +1,61 @@
+## Swarm01
+docker swarm init --advertise-addr 192.168.10.1
+
+## Swarm 02/03
+docker swarm join --token SWMTKN-1-4b0yzdn30rx7qopbor2j0frbdx110a9kxfurtpqtp4modi80so-25gg795z2y85tj47j7hv56w90 192.168.10.1:2377
+
+## Overlay Network
+docker network create --subnet 1.0.0.0/8 --driver overlay saas
+
+## Consul Server
+# On each node :
+mkdir /var/consul
+
+# On manager node
+# docker service create --name consul --mode global --mount type=bind,source=/var/consul,target=/consul/data --network saas --env CONSUL_BIND_INTERFACE=eth0 --env CONSUL_CLIENT_INTERFACE=eth0 consul agent -server -bootstrap-expect=3  -retry-join=tasks.consul
+
+# Test
+# from within a container, docker ps thent docker exec -it <ID> /bin/sh
+curl http://consul:8500/v1/agent/members?pretty
+
+# Registrator
+docker service create --name=registrator --network saas --mode global --mount type=bind,source=/var/run/docker.sock,target=/tmp/docker.sock gliderlabs/registrator:latest -internal consul://consul:8500
+
+# Test
+# from within a container
+curl curl http://consul:8500/v1/catalog/services?pretty
+{
+    "consul": [],
+    "consul-8300": [],
+    "consul-8301": [
+        "udp"
+    ],
+    "consul-8302": [
+        "udp"
+    ],
+    "consul-8500": [],
+    "consul-8600": [
+        "udp"
+    ]
+}
+
+# Create a new service
+docker service create --name redis redis
+
+# from within a container
+curl http://consul:8500/v1/catalog/services?pretty
+{
+    "consul": [],
+    "consul-8300": [],
+    "consul-8301": [
+        "udp"
+    ],
+    "consul-8302": [
+        "udp"
+    ],
+    "consul-8500": [],
+    "consul-8600": [
+        "udp"
+    ],
+    "redis": []
+}
