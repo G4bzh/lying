@@ -7,35 +7,30 @@
 # you're doing.
 Vagrant.configure("2") do |config|
 
-  config.vm.define "bind" do |bind|
+  config.vm.define "swarm01" do |swarm01|
 
-    bind.vm.box = "debian/contrib-stretch64"
-    bind.vm.network "private_network", ip:"172.16.12.1"
-    bind.vm.network "forwarded_port", guest: 22, host: 2201, id:"ssh"
-    # Need admin privileges to bind <1024 ports
-    bind.vm.network "forwarded_port", guest: 53, host: 53, protocol: "udp"
-    bind.vm.network "forwarded_port", guest: 53, host: 53, protocol: "tcp"
-    bind.vm.synced_folder "../bind", "/bind"
-    bind.vm.provision "shell", path: "provisionBind.sh"
+    swarm01.vm.box = "debian/contrib-stretch64"
+    swarm01.vm.network "private_network", ip:"192.168.10.1"
+    swarm01.vm.network "forwarded_port", guest: 22, host: 2201, id:"ssh"
+    swarm01.vm.provision "shell", path: "provisionSwarm.sh"
 
   end
 
-  config.vm.define "client" do |client|
+  config.vm.define "swarm02" do |swarm02|
 
-    client.vm.box = "debian/contrib-stretch64"
-    client.vm.network "private_network", ip:"172.16.12.2"
-    client.vm.network "forwarded_port", guest: 22, host: 2202, id:"ssh"
-    client.vm.provision "shell", path: "provisionClient.sh"
+    swarm02.vm.box = "debian/contrib-stretch64"
+    swarm02.vm.network "private_network", ip:"192.168.10.2"
+    swarm02.vm.network "forwarded_port", guest: 22, host: 2202, id:"ssh"
+    swarm02.vm.provision "shell", path: "provisionSwarm.sh"
 
   end
 
-  config.vm.define "rabbitmq" do |rabbitmq|
+  config.vm.define "swarm03" do |swarm03|
 
-    rabbitmq.vm.box = "debian/contrib-stretch64"
-    rabbitmq.vm.network "private_network", ip:"172.16.12.3"
-    rabbitmq.vm.network "forwarded_port", guest: 22, host: 2203, id:"ssh"
-    rabbitmq.vm.network "forwarded_port", guest: 15672, host: 15672, protocol: "tcp"
-    rabbitmq.vm.provision "shell", path: "provisionrabbitmq.sh"
+    swarm03.vm.box = "debian/contrib-stretch64"
+    swarm03.vm.network "private_network", ip:"192.168.10.3"
+    swarm03.vm.network "forwarded_port", guest: 22, host: 2203, id:"ssh"
+    swarm03.vm.provision "shell", path: "provisionSwarm.sh"
 
   end
 
