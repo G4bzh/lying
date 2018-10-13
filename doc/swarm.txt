@@ -116,7 +116,7 @@ vi nginx/simple.conf
   }
 
 # Run nginx with that config and publish port (port 8500 is from vagrant, not related to consul :-) )
-docker service create --name nginx -p 8500:80 --network saas --constraint=node.role==manager --mount type=bind,source=$PWD/nginx,target=/etc/nginx/conf.d nginx
+docker service create --name nginx -p 8500:80 --network saas --constraint=node.role==manager --mount type=bind,source=/root/nginx,target=/etc/nginx/conf.d nginx
 
 # Here, nginx displays not found as there is no html file to publis.
 # Now let's create a consul template for loadbalancing
@@ -140,6 +140,22 @@ docker service create --name nginx -p 8500:80 --network saas --constraint=node.r
 
   }
 
+
+
+# We need to tweak consult-template:alpin
+# We need to install docker into that container and to run consul-template as root (to use docker socket)
+
+
+cat Dockerfile
+
+  FROM hashicorp/consul-template:alpine
+  RUN apk update
+  RUN apk add docker
+  RUN sed -i "s/gosu consul-template/gosu root/g" /usr/local/bin/docker-entrypoint.sh
+
+docker build -t my-consul-template .
+
+
 # Run consul template : we are mounting docker and its socket in order to launch "docker service update" from within consul template
 # We are mapping nginf conf.d to tmp dir of consul template in order to generate the conf
 # We give the templating rule : transform ctmpl file into nginx conf file then update docker service
@@ -147,12 +163,10 @@ docker service create --name nginx -p 8500:80 --network saas --constraint=node.r
 
 docker service create  --name consul-tpl --network saas --constraint=node.role==manager -e CONSUL_TEMPLATE_LOG=debug  \
 --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock  \
---mount type=bind,source=/usr/bin/docker,target=/usr/bin/docker  \
---mount type=bind,source=$PWD/nginx,target=/tmp/nginx  \
-hashicorp/consul-template:alpine \
--template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:/usr/bin/docker service update --force nginx" \
+--mount type=bind,source=/root/nginx,target=/tmp/nginx  \
+ my-consul-template \
+-template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:docker service update --force nginx" \
 -consul-addr consul:8500
-
 
 
 # Now test
