@@ -1,4 +1,4 @@
-# docker node update --label-add consul=1 <Id1>
+# docker node update --label-add consul=1 <Id1 of swarm manager>
 # docker node update --label-add consul=2 <Id2>
 # docker node update --label-add consul=1 <Id3>
 
