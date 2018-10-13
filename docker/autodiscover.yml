@@ -1,4 +1,140 @@
-version: '3'
+# docker node update --label-add consul=1 <Id1>
+# docker node update --label-add consul=2 <Id2>
+# docker node update --label-add consul=1 <Id3>
+
+version: '3.7'
+
+
+services:
+
+  #
+  # Consul Cluster
+  #
+  consul01:
+    image: consul
+    environment:
+      - CONSUL_CLIENT_INTERFACE=eth0
+      - CONSUL_BIND_INTERFACE=eth0
+    command: agent -server -bootstrap-expect=3  -retry-join=consul02 -retry-join=consul03
+    networks:
+      - saas
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 1]
+
+  consul02:
+    image: consul
+    environment:
+      - CONSUL_CLIENT_INTERFACE=eth0
+      - CONSUL_BIND_INTERFACE=eth0
+    command: agent -server -bootstrap-expect=3  -retry-join=consul01 -retry-join=consul03
+    networks:
+      - saas
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 2]
+
+  consul03:
+    image: consul
+    environment:
+      - CONSUL_CLIENT_INTERFACE=eth0
+      - CONSUL_BIND_INTERFACE=eth0
+    command: agent -server -bootstrap-expect=3  -retry-join=consul02 -retry-join=consul01
+    networks:
+      - saas
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 3]
+
+  #
+  # Registrator on each node
+  #
+  registrator01:
+    image: gliderlabs/registrator:latest
+    command: -internal consul://consul01:8500
+    networks:
+      - saas
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /tmp/docker.sock
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 1]
+
+  registrator02:
+    image: gliderlabs/registrator:latest
+    command: -internal consul://consul02:8500
+    networks:
+      - saas
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /tmp/docker.sock
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 2]
+
+  registrator03:
+    image: gliderlabs/registrator:latest
+    command: -internal consul://consul03:8500
+    networks:
+      - saas
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /tmp/docker.sock
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 3]
+
+  #
+  # Hello Service
+  #
+  hello:
+    image: nginxdemos/hello:plain-text
+    networks:
+      - saas
+
+  #
+  # Nginx loadbalancer
+  #
+  nginx:
+    image: nginx
+    networks:
+      - saas
+    volumes:
+      - type: bind
+        source: /docker
+        target: /etc/nginx/conf.d
+    ports:
+      - target: 80
+        published: 8080
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 1]
+
+  #
+  # Consul Template
+  # docker build -t consul-template-custom -f /docker/Dockerfile_ConsulTemplate .
+  #
+  consul-template:
+    image: consul-template-custom:latest
+    command: -template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:docker service update --force SAAS_nginx" -consul-addr consul01:8500
+    networks:
+      - saas
+    environment:
+      - CONSUL_TEMPLATE_LOG=debug
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: /docker
+        target: /tmp/nginx
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 1]
 
 networks:
   saas:

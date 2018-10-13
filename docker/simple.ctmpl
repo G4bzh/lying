@@ -1,0 +1,16 @@
+upstream helloservers {
+  {{range service "hello"}}
+    server {{.Address}}:{{.Port}} ;
+  {{end}}
+}
+
+
+server {
+  listen 80;
+
+  location / {
+    proxy_pass  http://helloservers;
+    proxy_next_upstream error timeout invalid_header http_500;
+  }
+
+}
