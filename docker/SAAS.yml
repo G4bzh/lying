@@ -95,18 +95,30 @@ services:
         constraints: [node.labels.consul == 3]
 
   #
-  # Hello Service
+  # Hello Services
+  # SERVICE_TAGS labels will be captured by registrator. We set source ip in it
   #
-  hello:
+  hello-client01:
     image: nginxdemos/hello:plain-text
     networks:
       - saas
+    labels:
+      - SERVICE_TAGS=~^1\..*
+      - SERVICE_NAME=hello-client01
+
+  hello-client02:
+    image: tutum/hello-world
+    networks:
+      - saas
+    labels:
+      - SERVICE_TAGS=~^10.*
+      - SERVICE_NAME=hello-client02
 
   #
   # Nginx loadbalancer
   #
   nginx:
-    image: nginx
+    image: nginx:latest
     networks:
       - saas
     volumes:
@@ -116,6 +128,8 @@ services:
     ports:
       - target: 80
         published: 8080
+    depends_on:
+      - consul-template
     deploy:
       placement:
         constraints: [node.labels.consul == 1]

@@ -1,16 +1,30 @@
-upstream helloservers {
-  {{range service "hello"}}
-    server {{.Address}}:{{.Port}} ;
-  {{end}}
+
+{{ range services }}{{ if .Name | regexMatch "hello.*" }}
+upstream {{ .Name }} {
+   {{range service .Name}}server {{.Address}}:{{.Port}} ;
+   {{end}}
+ }{{ end }}{{ end }}
+
+upstream default {
+  server www.google.fr:80;
 }
+
+# Get Source IP from Tags
+map $remote_addr $backend {
+{{ range services }}{{ if .Name | regexMatch "hello.*" }}{{$sname := .Name}}{{with service $sname}}{{ with index . 0 }}{{range .Tags}}{{.}} {{$sname}} ;
+{{end}}{{ end }}{{ end }}{{ end }}{{ end }}
+default default;
+}
+
+
 
 
 server {
   listen 80;
 
   location / {
-    proxy_pass  http://helloservers;
-    proxy_next_upstream error timeout invalid_header http_500;
+    proxy_pass  http://$backend;
+    proxy_next_upstream error timeout invalid_header http_404;
   }
 
 }
