@@ -54,6 +54,8 @@ services:
     command: -internal consul://consul01:8500
     networks:
       - saas
+    depends_on:
+      - consul01
     volumes:
       - type: bind
         source: /var/run/docker.sock
@@ -67,6 +69,8 @@ services:
     command: -internal consul://consul02:8500
     networks:
       - saas
+    depends_on:
+      - consul02
     volumes:
       - type: bind
         source: /var/run/docker.sock
@@ -80,6 +84,8 @@ services:
     command: -internal consul://consul03:8500
     networks:
       - saas
+    depends_on:
+      - consul03
     volumes:
       - type: bind
         source: /var/run/docker.sock
@@ -125,6 +131,10 @@ services:
       - saas
     environment:
       - CONSUL_TEMPLATE_LOG=debug
+    depends_on:
+      - consul01
+      - consul02
+      - consul03
     volumes:
       - type: bind
         source: /var/run/docker.sock
@@ -136,9 +146,64 @@ services:
       placement:
         constraints: [node.labels.consul == 1]
 
+  #
+  # MongoDB Master
+  # mkdir /mongodb on consul02
+  #
+  mongodb01:
+    image: bitnami/mongodb:latest
+    networks:
+      - saas
+    volumes:
+      - type: bind
+        source: /mongodb
+        target: /bitnami/mongodb
+    environment:
+      - MONGODB_REPLICA_SET_MODE=primary
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 2]
+    volumes:
+      - mongodb_data:/bitnami
+
+  #
+  # MongoDB Secondary
+  #
+  mongodb02:
+    image: bitnami/mongodb:latest
+    networks:
+      - saas
+    depends_on:
+      - mongodb01
+    environment:
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_PRIMARY_HOST=mongodb01
+      - MONGODB_PRIMARY_PORT_NUMBER=27017
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 3]
+
+  #
+  # MongoDB arbitrer
+  #
+  mongodb03:
+    image: bitnami/mongodb:latest
+    networks:
+      - saas
+    depends_on:
+      - mongodb01
+    environment:
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_PRIMARY_HOST=mongodb01
+      - MONGODB_PRIMARY_PORT_NUMBER=27017
+
 networks:
   saas:
     driver: overlay
     ipam:
       config:
       - subnet: 1.0.0.0/8
+
+volumes:
+  mongodb_data:
+    driver: local
