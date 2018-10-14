@@ -13,4 +13,5 @@ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DC
 # MongoDB 3.6 for mgo driver (4.0 not supported yet)
 echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/3.6 main" | tee /etc/apt/sources.list.d/mongodb-org-3.6.list
 apt-get update -y
-apt-get install -y mongodb-org
+apt-get install -y --allow-unauthenticated mongodb-org
+mkdir -p /data/db
