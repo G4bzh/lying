@@ -1,0 +1,45 @@
+{
+  "_id" : "foo@bar.com",
+  "username" : "joe",
+  "password" : "hashme",
+  "sources" :
+  [
+    "193.23.24.25",
+    "222.111.222.111"
+  ],
+  "forwarders" :
+  [
+    "1.1.1.1",
+    "8.8.8.8"
+  ],
+  "zones" :
+  [
+    {
+      "domain" : "example.com",
+      "rr" :
+      [
+        {
+          "name" : "@",
+          "type" : "SOA",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "ns mail 2018101401  1h 15m 30d 1h"
+        },
+        {
+          "name" : "ns",
+          "type" : "A",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "127.0.0.1"
+        },
+        {
+          "name" : "www",
+          "type" : "CNAME",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "front.hosted.com."
+        }
+      ]
+    }
+  ]
+}
