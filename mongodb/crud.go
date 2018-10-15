@@ -36,7 +36,7 @@ type Record 	struct {
 // Usage
 //
 func usage() {
-	fmt.Printf("Usage: %s <clientID>\n", os.Args[0])
+	fmt.Printf("Usage: %s <username>\n", os.Args[0])
 }
 
 
@@ -70,8 +70,7 @@ func main() {
 // Get collection object
 c := session.DB(DATABASE).C(COLLECTION)
 
-
-// Get all data for that user
+// Get all data for given user
 var rec Record
 if err := c.Find(bson.M{"username" : os.Args[1]}).Select(nil).One(&rec); err != nil {
 		panic(err)
