@@ -1,18 +1,48 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
 
+//
+// Mongodb Model Mapping
+//
+type RR	struct {
+	Name  	string        `bson:"name"`
+	Type  	string        `bson:"type"`
+	Class  	string        `bson:"class"`
+	TTL  		string        `bson:"ttl"`
+	Rdata  	string        `bson:"rdata"`
+}
 
-type User struct {
-	Username   string        `bson:"username"`
-	Password   string        `bson:"password"`
+type Zone struct {
+	Domain  	string        `bson:"domain"`
+	RR				[]RR					`bson:"rr"`
+}
+
+type Record 	struct {
+	Id					string				`bson:"_id" json:"id"`
+	Username  	string        `bson:"username"`
+	Password  	string        `bson:"password"`
+	Sources			[]string			`bson:"sources"`
+	Forwarders	[]string			`bson:"forwarders"`
+	Zones				[]Zone				`bson:"zones"`
+}
+
+//
+// Usage
+//
+func usage() {
+	fmt.Printf("Usage: %s <clientID>\n", os.Args[0])
 }
 
 
+//
+// Main
+//
 func main() {
 
   const (
@@ -21,6 +51,11 @@ func main() {
 		COLLECTION = "data"
 	)
 
+	// Sanity check
+	if (len(os.Args) != 2) {
+		usage()
+		panic("Wrong argument")
+	}
 
   // Connect to Database
   session, err := mgo.Dial(URL)
@@ -28,24 +63,20 @@ func main() {
 		panic(err)
 	}
   fmt.Printf("Connected to %s\n",URL)
+	// Read secondaries with consistence
+	session.SetMode(mgo.Monotonic, true)
 	defer session.Close()
 
 // Get collection object
 c := session.DB(DATABASE).C(COLLECTION)
 
-// Get a user
-var u User
-if err := c.Find(nil).Select(bson.M{"username": 1, "password":1}).One(&u); err != nil {
-		panic(err)
-	}
-fmt.Println(u.Username)
 
 // Get all data for that user
-var all []interface{}
-if err := c.Find(bson.M{"username" : u.Username}).Select(nil).All(&all); err != nil {
+var rec Record
+if err := c.Find(bson.M{"username" : os.Args[1]}).Select(nil).One(&rec); err != nil {
 		panic(err)
 	}
-fmt.Printf("%v\n",all.forwarders)
+fmt.Printf("%v\n",rec)
 
 
 }
