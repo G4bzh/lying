@@ -23,7 +23,7 @@ type RRs 	[]RR
 
 type Zone struct {
 	Domain  	string        `bson:"domain"`
-	RR				RRs 					`bson:"rr"`
+	RRs				RRs 					`bson:"rr"`
 }
 
 type Zones 	[]Zone
@@ -103,10 +103,10 @@ func main() {
 
 	// Sort Zones
 	for _, z := range rec.Zones {
-		sort.SliceStable(z.RR,z.RR.rrSort)
+		sort.SliceStable(z.RRs,z.RRs.rrSort)
 		fmt.Printf("Zone: %s\n",z.Domain)
 
-		for _, r := range z.RR {
+		for _, r := range z.RRs {
 			fmt.Printf("\t%s\t%d\t%s\t%s\t%s\n",
 				r.Name,
 				r.TTL,
