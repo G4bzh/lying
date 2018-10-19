@@ -40,12 +40,6 @@ type Record 	struct {
 	Zones				Zones					`bson:"zones"`
 }
 
-//
-// Usage
-//
-func usage() {
-	fmt.Printf("Usage: %s <username>\n", os.Args[0])
-}
 
 //
 // Sort RR Slice
