@@ -67,6 +67,9 @@ func (r RRs)rrSort(i,j int) bool {
 
 }
 
+const zonesTmpl = `{{range .RRs}}
+{{.Name}} {{.TTL}} {{.Class}} {{.Type}} {{.Rdata}}{{end}}
+`
 
 //
 // Main
@@ -123,7 +126,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		tmpl = template.Must(template.ParseFiles("zone.txt.tmpl"))
+		tmpl = template.Must(template.New("zones").Parse(zonesTmpl))
 		if err = tmpl.Execute(f, z); err != nil {
 			panic(err)
 		}
