@@ -67,8 +67,42 @@ func (r RRs)rrSort(i,j int) bool {
 
 }
 
+//
+// Templates
+//
 const zonesTmpl = `{{range .RRs}}
 {{.Name}} {{.TTL}} {{.Class}} {{.Type}} {{.Rdata}}{{end}}
+`
+
+const namedTmpl = `options {
+        directory "/var/cache/bind";
+        forwarders {
+              {{range .Forwarders}}
+              {{.}};{{end}}
+        };
+
+        query-source address * port 53;
+        listen-on { any; };
+
+        auth-nxdomain no;    # conform to RFC1035
+        listen-on-v6 { any; };
+
+        zone-statistics yes;
+
+        response-policy { zone "rpz"; };
+};
+
+logging {
+      channel "querylog" { file "/var/log/dns-query.log"; print-time yes; print-category yes; print-severity yes; };
+      category queries { querylog; };
+};
+
+{{range .Zones}}
+zone "{{.Domain}}" {
+    type master;
+    file "{{.Domain}}.txt";
+};
+{{end}}
 `
 
 //
@@ -110,7 +144,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	tmpl := template.Must(template.ParseFiles("named.conf.tmpl"))
+	tmpl := template.Must(template.New("named").Parse(namedTmpl))
 	if err = tmpl.Execute(f, rec); err != nil {
 		panic(err)
 	}
