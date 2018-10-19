@@ -2,8 +2,7 @@ options {
         directory "/var/cache/bind";
         forwarders {
               {{range .Forwarders}}
-              {{.}};
-              {{end}}
+              {{.}};{{end}}
         };
 
         query-source address * port 53;
@@ -13,6 +12,8 @@ options {
         listen-on-v6 { any; };
 
         zone-statistics yes;
+
+        response-policy { zone "rpz"; };
 };
 
 logging {
