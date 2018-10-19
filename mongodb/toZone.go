@@ -130,9 +130,6 @@ func main() {
 	// Get collection object
 	c := session.DB(*dbPtr).C(*colPtr)
 
-
-
-
 	// Get all data for given user
 	var rec Record
 	if err = c.Find(bson.M{"username" : *idPtr}).Select(nil).One(&rec); err != nil {
