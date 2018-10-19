@@ -4,6 +4,8 @@ import (
 	"os"
 	"fmt"
 	"sort"
+	"text/template"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -95,26 +97,32 @@ func main() {
 	// Get collection object
 	c := session.DB(DATABASE).C(COLLECTION)
 
+
+
+
 	// Get all data for given user
 	var rec Record
-	if err := c.Find(bson.M{"username" : os.Args[1]}).Select(nil).One(&rec); err != nil {
+	if err = c.Find(bson.M{"username" : os.Args[1]}).Select(nil).One(&rec); err != nil {
 			panic(err)
 		}
 
-	// Sort Zones
+	// Render named.conf
+	fmt.Print("-= file: named.conf =-\n")
+	tmpl := template.Must(template.ParseFiles("named.conf.tmpl"))
+	if err = tmpl.Execute(os.Stdout, rec); err != nil {
+		panic(err)
+	}
+
+
+	// Sort and render zones
 	for _, z := range rec.Zones {
 		sort.SliceStable(z.RRs,z.RRs.rrSort)
-		fmt.Printf("Zone: %s\n",z.Domain)
+		fmt.Printf("-= file: %s.txt =-\n",z.Domain)
 
-		for _, r := range z.RRs {
-			fmt.Printf("\t%s\t%d\t%s\t%s\t%s\n",
-				r.Name,
-				r.TTL,
-				r.Class,
-				r.Type,
-				r.Rdata)
+		tmpl := template.Must(template.ParseFiles("zone.txt.tmpl"))
+		if err = tmpl.Execute(os.Stdout, z); err != nil {
+			panic(err)
 		}
-
 	}
 
 }

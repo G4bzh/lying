@@ -1,0 +1,28 @@
+options {
+        directory "/var/cache/bind";
+        forwarders {
+              {{range .Forwarders}}
+              {{.}};
+              {{end}}
+        };
+
+        query-source address * port 53;
+        listen-on { any; };
+
+        auth-nxdomain no;    # conform to RFC1035
+        listen-on-v6 { any; };
+
+        zone-statistics yes;
+};
+
+logging {
+      channel "querylog" { file "/var/log/dns-query.log"; print-time yes; print-category yes; print-severity yes; };
+      category queries { querylog; };
+};
+
+{{range .Zones}}
+zone "{{.Domain}}" {
+    type master;
+    file "{{.Domain}}.txt";
+};
+{{end}}
