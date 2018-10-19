@@ -2,3 +2,4 @@ vagrant/.vagrant
 docker/simple.conf
 mongodb/*.txt
 mongodb/*.conf
+mongodb/toZone

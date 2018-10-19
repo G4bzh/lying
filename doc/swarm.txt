@@ -153,7 +153,10 @@ cat Dockerfile
   RUN apk add docker
   RUN sed -i "s/gosu consul-template/gosu root/g" /usr/local/bin/docker-entrypoint.sh
 
-docker build -t my-consul-template .
+docker build -t g4bzh/ctmpl  -f Dockerfile_ConsulTemplate .
+docker login
+docker push  g4bzh/ctmpl
+
 
 
 # Run consul template : we are mounting docker and its socket in order to launch "docker service update" from within consul template
@@ -164,7 +167,7 @@ docker build -t my-consul-template .
 docker service create  --name consul-tpl --network saas --constraint=node.role==manager -e CONSUL_TEMPLATE_LOG=debug  \
 --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock  \
 --mount type=bind,source=/root/nginx,target=/tmp/nginx  \
- my-consul-template \
+g4bzh/ctmpl \
 -template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:docker service update --force nginx" \
 -consul-addr consul:8500
 

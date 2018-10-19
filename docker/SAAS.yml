@@ -139,7 +139,7 @@ services:
   # docker build -t consul-template-custom -f /docker/Dockerfile_ConsulTemplate .
   #
   consul-template:
-    image: consul-template-custom:latest
+    image: g4bzh/ctmpl:latest
     command: -template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:docker service update --force SAAS_nginx" -consul-addr consul01:8500
     networks:
       - saas

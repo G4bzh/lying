@@ -26,6 +26,13 @@
           "rdata" : "ns mail 2018101401  1h 15m 30d 1h"
         },
         {
+          "name" : "@",
+          "type" : "NS",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "ns"
+        },
+        {
           "name" : "ns",
           "type" : "A",
           "class" : "IN",

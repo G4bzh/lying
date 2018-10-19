@@ -69,7 +69,7 @@ const zonesTmpl = `{{range .RRs}}
 `
 
 const namedTmpl = `options {
-        directory "/var/cache/bind";
+        directory "/etc/bind";
         forwarders {
               {{range .Forwarders}}
               {{.}};{{end}}
@@ -83,7 +83,8 @@ const namedTmpl = `options {
 
         zone-statistics yes;
 
-        response-policy { zone "rpz"; };
+				{{range .Zones}}{{ if eq .Domain  "rpz" }}
+        response-policy { zone "rpz"; };{{end}}{{end}}
 };
 
 logging {
@@ -126,7 +127,7 @@ func main() {
 
 	// Get all data for given user
 	var rec Record
-	if err = c.Find(bson.M{"username" : *idPtr}).Select(nil).One(&rec); err != nil {
+	if err = c.Find(bson.M{"_id" : *idPtr}).Select(nil).One(&rec); err != nil {
 			panic(err)
 		}
 
