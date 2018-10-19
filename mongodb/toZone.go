@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"sort"
+	"flag"
 	"text/template"
 
 	"github.com/globalsign/mgo"
@@ -72,57 +73,62 @@ func (r RRs)rrSort(i,j int) bool {
 //
 func main() {
 
-  const (
-		URL   = "127.0.0.1:27017"
-		DATABASE   = "saas"
-		COLLECTION = "data"
-	)
+	idPtr := flag.String("id","","Client ID")
+	urlPtr := flag.String("url","127.0.0.1:27017","MongoDB URL")
+	dbPtr := flag.String("db","saas","MongoDB Database")
+	colPtr := flag.String("col","data","MongoDB Collection")
 
-	// Sanity check
-	if (len(os.Args) != 2) {
-		usage()
-		panic("Wrong argument")
-	}
+	flag.Parse()
 
   // Connect to Database
-  session, err := mgo.Dial(URL)
+  session, err := mgo.Dial(*urlPtr)
   if err != nil {
 		panic(err)
 	}
-  fmt.Printf("Connected to %s\n",URL)
+  fmt.Printf("Connected to %s\n",*urlPtr)
 	// Read secondaries with consistence
 	session.SetMode(mgo.Monotonic, true)
 	defer session.Close()
 
 	// Get collection object
-	c := session.DB(DATABASE).C(COLLECTION)
+	c := session.DB(*dbPtr).C(*colPtr)
 
 
 
 
 	// Get all data for given user
 	var rec Record
-	if err = c.Find(bson.M{"username" : os.Args[1]}).Select(nil).One(&rec); err != nil {
+	if err = c.Find(bson.M{"username" : *idPtr}).Select(nil).One(&rec); err != nil {
 			panic(err)
 		}
 
 	// Render named.conf
-	fmt.Print("-= file: named.conf =-\n")
-	tmpl := template.Must(template.ParseFiles("named.conf.tmpl"))
-	if err = tmpl.Execute(os.Stdout, rec); err != nil {
+	f, err := os.OpenFile("named.conf", os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
 		panic(err)
 	}
+	tmpl := template.Must(template.ParseFiles("named.conf.tmpl"))
+	if err = tmpl.Execute(f, rec); err != nil {
+		panic(err)
+	}
+	f.Close()
 
 
 	// Sort and render zones
 	for _, z := range rec.Zones {
-		sort.SliceStable(z.RRs,z.RRs.rrSort)
-		fmt.Printf("-= file: %s.txt =-\n",z.Domain)
 
-		tmpl := template.Must(template.ParseFiles("zone.txt.tmpl"))
-		if err = tmpl.Execute(os.Stdout, z); err != nil {
+		sort.SliceStable(z.RRs,z.RRs.rrSort)
+
+		f, err = os.OpenFile(z.Domain + ".txt" , os.O_RDWR|os.O_CREATE, 0755)
+		if err != nil {
 			panic(err)
 		}
+		tmpl = template.Must(template.ParseFiles("zone.txt.tmpl"))
+		if err = tmpl.Execute(f, z); err != nil {
+			panic(err)
+		}
+		f.Close()
+
 	}
 
 }
