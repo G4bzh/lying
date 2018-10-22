@@ -117,48 +117,61 @@ services:
   #
   # Nginx loadbalancer
   #
+  # nginx:
+  #   image: nginx:latest
+  #   networks:
+  #     - saas
+  #   volumes:
+  #     - type: bind
+  #       source: /docker
+  #       target: /etc/nginx/conf.d
+  #   ports:
+  #     - target: 80
+  #       published: 8080
+  #   depends_on:
+  #     - consul-template
+  #   deploy:
+  #     placement:
+  #       constraints: [node.labels.consul == 1]
   nginx:
-    image: nginx:latest
+    image: g4bzh/ngx:latest
     networks:
       - saas
-    volumes:
-      - type: bind
-        source: /docker
-        target: /etc/nginx/conf.d
+    environment:
+      - CONSUL_TEMPLATE_LOG=debug  
     ports:
       - target: 80
         published: 8080
     depends_on:
-      - consul-template
+      - consul01
     deploy:
       placement:
         constraints: [node.labels.consul == 1]
-
   #
   # Consul Template
   # docker build -t consul-template-custom -f /docker/Dockerfile_ConsulTemplate .
   #
-  consul-template:
-    image: g4bzh/ctmpl:latest
-    command: -template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:docker service update --force SAAS_nginx" -consul-addr consul01:8500
-    networks:
-      - saas
-    environment:
-      - CONSUL_TEMPLATE_LOG=debug
-    depends_on:
-      - consul01
-      - consul02
-      - consul03
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-      - type: bind
-        source: /docker
-        target: /tmp/nginx
-    deploy:
-      placement:
-        constraints: [node.labels.consul == 1]
+  # consul-template:
+  #   image: g4bzh/ctmpl:latest
+  #   command: -template "/tmp/nginx/simple.ctmpl:/tmp/nginx/simple.conf:docker service update --force SAAS_nginx" -consul-addr consul01:8500
+  #   networks:
+  #     - saas
+  #   environment:
+  #     - CONSUL_TEMPLATE_LOG=debug
+  #   depends_on:
+  #     - consul01
+  #     - consul02
+  #     - consul03
+  #   volumes:
+  #     - type: bind
+  #       source: /var/run/docker.sock
+  #       target: /var/run/docker.sock
+  #     - type: bind
+  #       source: /docker
+  #       target: /tmp/nginx
+  #   deploy:
+  #     placement:
+  #       constraints: [node.labels.consul == 1]
 
   #
   # MongoDB Master
@@ -168,10 +181,6 @@ services:
     image: bitnami/mongodb:latest
     networks:
       - saas
-    volumes:
-      - type: bind
-        source: /mongodb
-        target: /bitnami/mongodb
     environment:
       - MONGODB_REPLICA_SET_MODE=primary
     deploy:

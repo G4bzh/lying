@@ -177,3 +177,11 @@ cat nginx/simple.conf
 docker service scale hello=10
 cat nginx/simple.conf
 docker service scale hello=1
+
+
+
+## Stack
+
+Assuming compose file is in /docker :
+
+  docker stack deploy -c /docker/SAAS.yml SAAS
