@@ -178,6 +178,14 @@ docker service scale hello=10
 cat nginx/simple.conf
 docker service scale hello=1
 
+Think it s easier to group nginx and consul-template :
+
+
+docker build -t g4bzh/ngnx  -f Dockerfile_NginxConsulTemplate .
+docker login
+docker push  g4bzh/ngnx
+
+
 
 
 ## Stack
