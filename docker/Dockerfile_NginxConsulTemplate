@@ -7,10 +7,7 @@ RUN mkdir -p /consul-template/config
 RUN rm -f /etc/nginx/conf.d/*.conf
 COPY simple.ctmpl /etc/nginx/conf.d/
 
-#RUN apt-get update && apt-get install -y supervisor
-#RUN mkdir -p /var/log/supervisor
-#COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
+# Overload nginx STOPSIGNAL which interfere with consul template
 STOPSIGNAL SIGQUIT
 
 CMD ["/usr/local/bin/consul-template", "-template", "/etc/nginx/conf.d/simple.ctmpl:/etc/nginx/conf.d/simple.conf", "-consul-addr", "consul01:8500", "-exec", "nginx -g 'daemon off;'"]
