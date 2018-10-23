@@ -117,7 +117,7 @@ services:
   #
   # Nginx loadbalancer
   #
-  nginx:
+  nginx01:
     image: g4bzh/ngx:latest
     networks:
       - saas
@@ -125,12 +125,27 @@ services:
       - CONSUL_TEMPLATE_LOG=debug
     ports:
       - target: 80
-        published: 8080
+        published: 8081
     depends_on:
       - consul01
     deploy:
       placement:
         constraints: [node.labels.consul == 1]
+
+  nginx02:
+    image: g4bzh/ngx:latest
+    networks:
+      - saas
+    environment:
+      - CONSUL_TEMPLATE_LOG=debug
+    ports:
+      - target: 80
+        published: 8082
+    depends_on:
+      - consul01
+    deploy:
+      placement:
+        constraints: [node.labels.consul == 2]
 
   #
   # MongoDB Master

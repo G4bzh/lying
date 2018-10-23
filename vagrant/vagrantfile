@@ -13,6 +13,8 @@ Vagrant.configure("2") do |config|
     swarm01.vm.network "private_network", ip:"192.168.10.1"
     swarm01.vm.network "forwarded_port", guest: 22, host: 2201, id:"ssh"
     swarm01.vm.network "forwarded_port", guest: 8080, host: 8080
+    swarm01.vm.network "forwarded_port", guest: 8081, host: 8081
+    swarm01.vm.network "forwarded_port", guest: 8082, host: 8082
     swarm01.vm.synced_folder "../docker", "/docker"
     swarm01.vm.provision "shell", path: "provisionSwarm.sh"
 
