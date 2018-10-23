@@ -1,6 +1,6 @@
 # docker node update --label-add consul=1 <Id1 of swarm manager>
 # docker node update --label-add consul=2 <Id2>
-# docker node update --label-add consul=1 <Id3>
+# docker node update --label-add consul=3 <Id3>
 
 version: '3.7'
 
@@ -138,7 +138,7 @@ services:
     networks:
       - saas
     environment:
-      - CONSUL_TEMPLATE_LOG=debug  
+      - CONSUL_TEMPLATE_LOG=debug
     ports:
       - target: 80
         published: 8080

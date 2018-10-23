@@ -11,4 +11,6 @@ COPY simple.ctmpl /etc/nginx/conf.d/
 #RUN mkdir -p /var/log/supervisor
 #COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-CMD ["/usr/local/bin/consul-template", "-template", "/etc/nginx/conf.d/simple.ctmpl:/etc/nginx/conf.d/simple.conf", "-consul-addr", "consul01:8500", "-exec", "nginx -g 'daemon off;'", "-exec-reload-signal=SIGHUP", "-kill-signal=SIGINT"]
+STOPSIGNAL SIGQUIT
+
+CMD ["/usr/local/bin/consul-template", "-template", "/etc/nginx/conf.d/simple.ctmpl:/etc/nginx/conf.d/simple.conf", "-consul-addr", "consul01:8500", "-exec", "nginx -g 'daemon off;'"]

@@ -37,12 +37,11 @@ Vagrant.configure("2") do |config|
   end
 
 
-  config.vm.define "dev" do |dev|
+  config.vm.define "dev", autostart: false do |dev|
 
     dev.vm.box = "alpine/alpine64"
     dev.vm.network "forwarded_port", guest: 22, host: 2204, id:"ssh"
     dev.vm.provision "shell", path: "provisionDev.sh"
-    dev.vm.define "dev", autostart: false
     dev.vm.synced_folder "../mongodb", "/mongodb"
   end
 
