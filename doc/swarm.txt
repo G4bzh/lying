@@ -193,6 +193,20 @@ docker login
 docker push  g4bzh/bnd
 
 
+docker service create --name bind --network SAAS_saas -e CLIENTID="foo@bar.com" -e MONGOURL="mongodb01:27017,mongodb02:27017" --constraint=node.labels.consul==1 g4bzh/bnd
+docker exec -it `docker ps | grep bind | cut -d ' ' -f 1` /bin/bash
+
+  root@7bf86586549e:/# env
+  HOSTNAME=7bf86586549e
+  PWD=/
+  HOME=/root
+  MONGOURL=mongodb01:27017,mongodb02:27017
+  TERM=xterm
+  SHLVL=1
+  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  CLIENTID=foo@bar.com
+  _=/usr/bin/env
+
 ## Stack
 
 Assuming compose file is in /docker :

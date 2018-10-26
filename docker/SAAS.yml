@@ -98,33 +98,33 @@ services:
   # Hello Services
   # SERVICE_TAGS labels will be captured by registrator. We set source ip in it
   #
-  hello-client01:
-    image: nginxdemos/hello:plain-text
-    networks:
-      - saas
-    labels:
-      - SERVICE_TAGS=~^1\..*
-      - SERVICE_NAME=hello-client01
-
-  hello-client02:
-    image: tutum/hello-world
-    networks:
-      - saas
-    labels:
-      - SERVICE_TAGS=~^10.*
-      - SERVICE_NAME=hello-client02
+  # hello-client01:
+  #   image: nginxdemos/hello:plain-text
+  #   networks:
+  #     - saas
+  #   labels:
+  #     - SERVICE_TAGS=~^1\..*
+  #     - SERVICE_NAME=hello-client01
+  #
+  # hello-client02:
+  #   image: tutum/hello-world
+  #   networks:
+  #     - saas
+  #   labels:
+  #     - SERVICE_TAGS=~^10.*
+  #     - SERVICE_NAME=hello-client02
 
   #
   # Bind Services
   # SERVICE_TAGS labels will be captured by registrator. We set source ip in it
   #
-  bind-client01:
-    image: g4bzh/bnd
-    networks:
-      - saas
-    labels:
-      - SERVICE_TAGS=~^1\..*
-      - SERVICE_NAME=bind-client01
+  # bind-client01:
+  #   image: g4bzh/bnd
+  #   networks:
+  #     - saas
+  #   labels:
+  #     - SERVICE_TAGS=~^1\..*
+  #     - SERVICE_NAME=bind-client01
 
   #
   # Nginx loadbalancer
