@@ -115,6 +115,18 @@ services:
       - SERVICE_NAME=hello-client02
 
   #
+  # Bind Services
+  # SERVICE_TAGS labels will be captured by registrator. We set source ip in it
+  #
+  bind-client01:
+    image: g4bzh/bnd
+    networks:
+      - saas
+    labels:
+      - SERVICE_TAGS=~^1\..*
+      - SERVICE_NAME=bind-client01
+
+  #
   # Nginx loadbalancer
   #
   nginx01:

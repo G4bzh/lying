@@ -4,3 +4,4 @@ mongodb/*.txt
 mongodb/*.conf
 mongodb/toZone
 docker/consul-template
+docker/toZone

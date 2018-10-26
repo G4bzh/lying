@@ -1,0 +1,12 @@
+FROM debian:stretch-slim
+
+RUN set -x \
+	&& apt-get update \
+	&& apt-get install --no-install-recommends --no-install-suggests -y bind9 \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY toZone /etc/bind/
+
+EXPOSE 53/udp 53/tcp
+
+CMD ["/usr/sbin/named","-f"]

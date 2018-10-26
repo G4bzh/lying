@@ -186,6 +186,11 @@ docker login
 docker push  g4bzh/ngnx
 
 
+## Bind
+
+docker build -t g4bzh/bnd  -f Dockerfile_Bind .
+docker login
+docker push  g4bzh/bnd
 
 
 ## Stack

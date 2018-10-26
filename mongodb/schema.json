@@ -41,10 +41,17 @@
         },
         {
           "name" : "www",
+          "type" : "A",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "1.2.3.4"
+        },
+        {
+          "name" : "mail",
           "type" : "CNAME",
           "class" : "IN",
           "ttl" : 3600,
-          "rdata" : "front.hosted.com."
+          "rdata" : "www"
         }
       ]
     }
