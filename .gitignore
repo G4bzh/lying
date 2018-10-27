@@ -2,4 +2,6 @@ vagrant/.vagrant
 simple.conf
 docker/ngx/consul-template
 docker/ngx/*.conf
-docker/toZone/toZone
+docker/bnd/toZone
+docker/bnd/named.conf
+docker/bnd/*.txt
