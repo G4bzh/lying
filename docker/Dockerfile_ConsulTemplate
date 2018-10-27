@@ -1,5 +1,0 @@
-FROM hashicorp/consul-template:alpine
-RUN apk update
-RUN apk add docker
-RUN sed -i "s/gosu consul-template/gosu root/g" /usr/local/bin/docker-entrypoint.sh
-  

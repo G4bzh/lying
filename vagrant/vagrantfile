@@ -45,6 +45,7 @@ Vagrant.configure("2") do |config|
     dev.vm.network "forwarded_port", guest: 22, host: 2204, id:"ssh"
     dev.vm.provision "shell", path: "provisionDev.sh"
     dev.vm.synced_folder "../mongodb", "/mongodb"
+    dev.vm.synced_folder "../docker", "/docker"
   end
 
 end
