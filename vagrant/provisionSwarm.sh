@@ -18,19 +18,12 @@ if [ "$HOSTNAME" == "swarm01" ]; then
   docker swarm init --advertise-addr 192.168.10.1
   docker swarm join-token -q worker > /vagrant/swarm_token
   docker node update swarm01 --label-add consul=1
-  ping -c 3 192.168.10.1
-fi
-if [ "$HOSTNAME" == "swarm02" ]; then
-  ping -c 3 192.168.10.1
-  ssh-keyscan -p 2201 -H 192.168.10.1 >> ~/.ssh/known_hosts
-  ssh 192.168.10.1 -p 2201 ping -c 192.168.10.2
-  docker swarm join --token `echo -n $(head /vagrant/swarm_token)` 192.168.10.1:2377
+  ping -c 3 192.168.10.2
+  ssh-keyscan -H 192.168.10.2 >> ~/.ssh/known_hosts
+  ssh 192.168.10.2 "docker swarm join --token `echo -n $(head /vagrant/swarm_token)` 192.168.10.1:2377"
   docker node update swarm02 --label-add consul=2
-fi
-if [ "$HOSTNAME" == "swarm03" ]; then
-  ping -c 3 192.168.10.1
-  ssh-keyscan -p 2201 -H 192.168.10.1 >> ~/.ssh/known_hosts
-  ssh 192.168.10.1 -p 2201 ping -c 192.168.10.2
-  docker swarm join --token `echo -n $(head /vagrant/swarm_token)` 192.168.10.1:2377
-  ssh 192.168.10.1 -p 2201 docker node update swarm03 --label-add consul=3
+  ping -c 3 192.168.10.3
+  ssh-keyscan -H 192.168.10.3 >> ~/.ssh/known_hosts
+  ssh 192.168.10.3 "docker swarm join --token `echo -n $(head /vagrant/swarm_token)` 192.168.10.1:2377"
+  docker node update swarm03 --label-add consul=3
 fi

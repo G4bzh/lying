@@ -7,20 +7,6 @@
 # you're doing.
 Vagrant.configure("2") do |config|
 
-  config.vm.define "swarm01" do |swarm01|
-
-    swarm01.vm.box = "debian/contrib-stretch64"
-    swarm01.vm.network "private_network", ip:"192.168.10.1"
-    swarm01.vm.hostname = "swarm01"
-    swarm01.vm.network "forwarded_port", guest: 22, host: 2201, id:"ssh"
-    swarm01.vm.network "forwarded_port", guest: 8080, host: 8080
-    swarm01.vm.network "forwarded_port", guest: 8081, host: 8081
-    swarm01.vm.network "forwarded_port", guest: 8082, host: 8082
-    swarm01.vm.synced_folder "../docker", "/docker"
-    swarm01.vm.provision "shell", path: "provisionSwarm.sh"
-
-  end
-
   config.vm.define "swarm02" do |swarm02|
 
     swarm02.vm.box = "debian/contrib-stretch64"
@@ -50,6 +36,20 @@ Vagrant.configure("2") do |config|
     dev.vm.provision "shell", path: "provisionDev.sh"
     dev.vm.synced_folder "../mongodb", "/mongodb"
     dev.vm.synced_folder "../docker", "/docker"
+  end
+
+  config.vm.define "swarm01" do |swarm01|
+
+    swarm01.vm.box = "debian/contrib-stretch64"
+    swarm01.vm.network "private_network", ip:"192.168.10.1"
+    swarm01.vm.hostname = "swarm01"
+    swarm01.vm.network "forwarded_port", guest: 22, host: 2201, id:"ssh"
+    swarm01.vm.network "forwarded_port", guest: 8080, host: 8080
+    swarm01.vm.network "forwarded_port", guest: 8081, host: 8081
+    swarm01.vm.network "forwarded_port", guest: 8082, host: 8082
+    swarm01.vm.synced_folder "../docker", "/docker"
+    swarm01.vm.provision "shell", path: "provisionSwarm.sh"
+
   end
 
 end
