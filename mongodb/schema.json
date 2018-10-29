@@ -57,3 +57,60 @@
     }
   ]
 }
+{
+  "_id" : "john@doe.com",
+  "username" : "john",
+  "password" : "hashmetoo",
+  "sources" :
+  [
+    "123.123.123.123"
+  ],
+  "forwarders" :
+  [
+    "8.8.4.4"
+  ],
+  "zones" :
+  [
+    {
+      "domain" : "example.com",
+      "rr" :
+      [
+        {
+          "name" : "@",
+          "type" : "SOA",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "ns mail 2018102901  1h 15m 30d 1h"
+        },
+        {
+          "name" : "@",
+          "type" : "NS",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "ns"
+        },
+        {
+          "name" : "ns",
+          "type" : "A",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "127.0.0.2"
+        },
+        {
+          "name" : "www",
+          "type" : "A",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "6.7.8.9"
+        },
+        {
+          "name" : "mail",
+          "type" : "CNAME",
+          "class" : "IN",
+          "ttl" : 3600,
+          "rdata" : "www"
+        }
+      ]
+    }
+  ]
+}

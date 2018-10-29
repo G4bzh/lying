@@ -1,8 +1,7 @@
 vagrant/.vagrant
 vagrant/swarm_token
-simple.conf
 docker/ngx/consul-template
-docker/ngx/*.conf
+docker/ngx/simple.conf
 docker/bnd/toZone
 docker/bnd/named.conf
 docker/bnd/*.txt

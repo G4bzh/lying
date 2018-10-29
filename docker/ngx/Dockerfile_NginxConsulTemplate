@@ -4,10 +4,14 @@ COPY consul-template /usr/local/bin/
 RUN mkdir -p /consul-template/data
 RUN mkdir -p /consul-template/config
 
+RUN rm -f /etc/nginx/nginx.conf
 RUN rm -f /etc/nginx/conf.d/*.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY simple.ctmpl /etc/nginx/conf.d/
 
 # Overload nginx STOPSIGNAL which interfere with consul template
 STOPSIGNAL SIGQUIT
+
+EXPOSE 53/udp 53/tcp
 
 CMD ["/usr/local/bin/consul-template", "-template", "/etc/nginx/conf.d/simple.ctmpl:/etc/nginx/conf.d/simple.conf", "-consul-addr", "consul01:8500", "-exec", "nginx -g 'daemon off;'"]

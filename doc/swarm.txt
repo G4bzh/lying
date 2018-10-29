@@ -23,7 +23,7 @@ docker service create --name=registrator --network saas --mode global --mount ty
 
 # Test
 # from within a container
-curl curl http://consul:8500/v1/catalog/services?pretty
+curl http://consul:8500/v1/catalog/services?pretty
 {
     "consul": [],
     "consul-8300": [],
@@ -181,9 +181,23 @@ docker service scale hello=1
 Think it s easier to group nginx and consul-template :
 
 
-docker build -t g4bzh/ngnx  -f Dockerfile_NginxConsulTemplate .
+docker build -t g4bzh/ngx  -f Dockerfile_NginxConsulTemplate .
 docker login
-docker push  g4bzh/ngnx
+docker push  g4bzh/ngx
+
+
+## Mongo
+
+Launch bitnmai images to create a replicaset (1 primary, 1 secondary and 1 arbitrer)
+Exec from with primary container:
+
+mongoimport -d saas -c data <<EOF
+<mongodb/schema.json content here>
+EOF
+
+This will provide us 2 clients (foo@bar.com and john@doe.com) with the same spoofed domain example.com:
+ - www and mail resolve into 1.2.3.4 for foo@bar.com
+ - www and mail resolve into 6.7.8.9 for john@doe.com
 
 
 ## Bind
@@ -192,9 +206,8 @@ docker build -t g4bzh/bnd  -f Dockerfile_Bind .
 docker login
 docker push  g4bzh/bnd
 
-
-docker service create --name bind --network SAAS_saas -e CLIENTID="foo@bar.com" -e MONGOURL="mongodb01:27017,mongodb02:27017" --constraint=node.labels.consul==1 g4bzh/bnd
-docker exec -it `docker ps | grep bind | cut -d ' ' -f 1` /bin/bash
+docker service create --name "dns-foo-bar-com" --network SAAS_saas -e CLIENTID="foo@bar.com" -e MONGOURL="mongodb01:27017,mongodb02:27017" -e SERVICE_TAGS="~^10.*" -e SERVICE_NAME="dns-foo-bar-com" --constraint=node.labels.consul==1 g4bzh/bnd
+docker exec -it `docker ps | grep dns | cut -d ' ' -f 1` /bin/bash
 
   root@7bf86586549e:/# env
   HOSTNAME=7bf86586549e
@@ -205,7 +218,24 @@ docker exec -it `docker ps | grep bind | cut -d ' ' -f 1` /bin/bash
   SHLVL=1
   PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   CLIENTID=foo@bar.com
+  SERVICE_NAME=dns-john-doe-com
+  SERVICE_TAGS=~^1\..*
   _=/usr/bin/env
+
+toZone will connect to MONGOURL and fetch DNS data for CLIENTID. Then bind will execute
+
+Launch another one :
+
+docker service create --name "dns-john-doe-com" --network SAAS_saas -e CLIENTID="john@doe.com" -e MONGOURL="mongodb01:27017,mongodb02:27017" -e SERVICE_TAGS="~^1\..*,5.5.5.5" -e SERVICE_NAME="dns-john-doe-com" g4bzh/bnd
+
+We have 2 bind containers with same spoofed domain example.com. Consul-template should have generate a config for nginx in order to route to DNS server according to ip source (stored in SERVICE_TAGS)
+Test it:
+
+nslookup www.example.com:
+ - from host (10.0.0.0 network) : 1.2.3.4
+ - from within a container (1.0.0.0 network - may need to install dnsutils into container) : 6.7.8.9
+
+Note that nslookup www.example.com from ip 5.5.5.5 will resolve too 6.7.8.9 too.
 
 ## Stack
 

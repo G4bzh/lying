@@ -1,17 +1,17 @@
 
-{{ range services }}{{ if .Name | regexMatch "hello.*" }}
+{{ range services }}{{ if .Name | regexMatch "dns.*" }}
 upstream {{ .Name }} {
    {{range service .Name}}server {{.Address}}:{{.Port}} ;
    {{end}}
  }{{ end }}{{ end }}
 
 upstream default {
-  server www.google.fr:80;
+  server 127.0.0.1:53;
 }
 
 # Get Source IP from Tags
 map $remote_addr $backend {
-{{ range services }}{{ if .Name | regexMatch "hello.*" }}{{$sname := .Name}}{{with service $sname}}{{ with index . 0 }}{{range .Tags}}{{.}} {{$sname}} ;
+{{ range services }}{{ if .Name | regexMatch "dns.*" }}{{$sname := .Name}}{{with service $sname}}{{ with index . 0 }}{{range .Tags}}{{.}} {{$sname}} ;
 {{end}}{{ end }}{{ end }}{{ end }}{{ end }}
 default default;
 }
@@ -20,11 +20,11 @@ default default;
 
 
 server {
-  listen 80;
+  listen 53 udp;
+  listen 53;
 
-  location / {
-    proxy_pass  http://$backend;
-    proxy_next_upstream error timeout invalid_header http_404;
-  }
+  proxy_pass  $backend;
+  proxy_timeout 1s;
+  proxy_responses 1;
 
 }
