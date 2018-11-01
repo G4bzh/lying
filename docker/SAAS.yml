@@ -10,121 +10,38 @@ services:
   #
   # Consul Cluster
   #
-  consul01:
+  consul:
     image: consul
     environment:
       - CONSUL_CLIENT_INTERFACE=eth0
       - CONSUL_BIND_INTERFACE=eth0
-    command: agent -server -bootstrap-expect=3  -retry-join=consul02 -retry-join=consul03
+    command: agent -server -bootstrap-expect=3  -retry-join=consul
     networks:
       - saas
     deploy:
+      mode: global
+      endpoint_mode: dnsrr
       placement:
-        constraints: [node.labels.consul == 1]
-
-  consul02:
-    image: consul
-    environment:
-      - CONSUL_CLIENT_INTERFACE=eth0
-      - CONSUL_BIND_INTERFACE=eth0
-    command: agent -server -bootstrap-expect=3  -retry-join=consul01 -retry-join=consul03
-    networks:
-      - saas
-    deploy:
-      placement:
-        constraints: [node.labels.consul == 2]
-
-  consul03:
-    image: consul
-    environment:
-      - CONSUL_CLIENT_INTERFACE=eth0
-      - CONSUL_BIND_INTERFACE=eth0
-    command: agent -server -bootstrap-expect=3  -retry-join=consul02 -retry-join=consul01
-    networks:
-      - saas
-    deploy:
-      placement:
-        constraints: [node.labels.consul == 3]
+        constraints:
+          - node.role == manager
 
   #
   # Registrator on each node
   #
-  registrator01:
+  registrator:
     image: gliderlabs/registrator:latest
-    command: -internal consul://consul01:8500
+    command: -internal consul://consul:8500
     networks:
       - saas
     depends_on:
-      - consul01
+      - consul
     volumes:
       - type: bind
         source: /var/run/docker.sock
         target: /tmp/docker.sock
     deploy:
-      placement:
-        constraints: [node.labels.consul == 1]
+        mode: global
 
-  registrator02:
-    image: gliderlabs/registrator:latest
-    command: -internal consul://consul02:8500
-    networks:
-      - saas
-    depends_on:
-      - consul02
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /tmp/docker.sock
-    deploy:
-      placement:
-        constraints: [node.labels.consul == 2]
-
-  registrator03:
-    image: gliderlabs/registrator:latest
-    command: -internal consul://consul03:8500
-    networks:
-      - saas
-    depends_on:
-      - consul03
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /tmp/docker.sock
-    deploy:
-      placement:
-        constraints: [node.labels.consul == 3]
-
-  #
-  # Hello Services
-  # SERVICE_TAGS labels will be captured by registrator. We set source ip in it
-  #
-  # hello-client01:
-  #   image: nginxdemos/hello:plain-text
-  #   networks:
-  #     - saas
-  #   labels:
-  #     - SERVICE_TAGS=~^1\..*
-  #     - SERVICE_NAME=hello-client01
-  #
-  # hello-client02:
-  #   image: tutum/hello-world
-  #   networks:
-  #     - saas
-  #   labels:
-  #     - SERVICE_TAGS=~^10.*
-  #     - SERVICE_NAME=hello-client02
-
-  #
-  # Bind Services
-  # SERVICE_TAGS labels will be captured by registrator. We set source ip in it
-  #
-  # bind-client01:
-  #   image: g4bzh/bnd
-  #   networks:
-  #     - saas
-  #   labels:
-  #     - SERVICE_TAGS=~^1\..*
-  #     - SERVICE_NAME=bind-client01
 
   #
   # Nginx loadbalancer
@@ -143,72 +60,63 @@ services:
         published: 53
         protocol: udp
     depends_on:
-      - consul01
+      - consul
     deploy:
       # placement:
       #   constraints: [node.labels.consul == 1]
       replicas: 2
 
-  # nginx02:
-  #   image: g4bzh/ngx:latest
-  #   networks:
-  #     - saas
-  #   environment:
-  #     - CONSUL_TEMPLATE_LOG=debug
-  #   ports:
-  #     - target: 80
-  #       published: 8082
-  #   depends_on:
-  #     - consul01
-  #   deploy:
-  #     placement:
-  #       constraints: [node.labels.consul == 2]
-
   #
   # MongoDB Master
-  # mkdir /mongodb on consul02
+  # mkdir /mongodb
   #
-  mongodb01:
+  mongodbPrimary:
     image: bitnami/mongodb:latest
     networks:
       - saas
     environment:
       - MONGODB_REPLICA_SET_MODE=primary
-    deploy:
-      placement:
-        constraints: [node.labels.consul == 2]
     volumes:
       - mongodb_data:/bitnami
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.mongodb == primary
+
 
   #
   # MongoDB Secondary
   #
-  mongodb02:
+  mongodbSeconday:
     image: bitnami/mongodb:latest
     networks:
       - saas
     depends_on:
-      - mongodb01
+      - mongodbPrimary
     environment:
       - MONGODB_REPLICA_SET_MODE=secondary
-      - MONGODB_PRIMARY_HOST=mongodb01
+      - MONGODB_PRIMARY_HOST=mongodbPrimary
       - MONGODB_PRIMARY_PORT_NUMBER=27017
     deploy:
+      mode: global
       placement:
-        constraints: [node.labels.consul == 3]
+        constraints:
+          - node.role == manager
+          - node.labels.mongodb != primary
 
   #
   # MongoDB arbitrer
   #
-  mongodb03:
+  mongodbArbiter:
     image: bitnami/mongodb:latest
     networks:
       - saas
     depends_on:
-      - mongodb01
+      - mongodbPrimary
     environment:
       - MONGODB_REPLICA_SET_MODE=arbiter
-      - MONGODB_PRIMARY_HOST=mongodb01
+      - MONGODB_PRIMARY_HOST=mongodbPrimary
       - MONGODB_PRIMARY_PORT_NUMBER=27017
 
 networks:
