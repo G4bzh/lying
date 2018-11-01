@@ -62,10 +62,7 @@ services:
     depends_on:
       - consul
     deploy:
-      # placement:
-      #   constraints: [node.labels.consul == 1]
-      replicas: 2
-
+      mode: global
   #
   # MongoDB Master
   # mkdir /mongodb
@@ -124,7 +121,7 @@ networks:
     driver: overlay
     ipam:
       config:
-      - subnet: 1.0.0.0/8
+      - subnet: 242.0.0.0/8
 
 volumes:
   mongodb_data:
