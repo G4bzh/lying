@@ -15,5 +15,7 @@ echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/3.6 main" | tee
 apt-get update -y
 apt-get install -y --allow-unauthenticated mongodb-org
 mkdir -p /data/db
+service mongod start
+mongoimport -d saas -c data < /mongodb/schema.json
 exit
-go get github.com/globalsign/mgo
+/usr/local/bin/go get github.com/globalsign/mgo
