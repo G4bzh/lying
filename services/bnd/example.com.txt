@@ -1,6 +1,0 @@
-
-@ 3600 IN SOA ns mail 2018101401  1h 15m 30d 1h
-ns 3600 IN A 127.0.0.1
-www 3600 IN A 1.2.3.4
-mail 3600 IN CNAME www
-@ 3600 IN NS ns
