@@ -1,0 +1,30 @@
+
+{{ range services }}{{ if .Name | regexMatch "dns.*" }}
+upstream {{ .Name }} {
+   {{range service .Name}}server {{.Address}}:{{.Port}} ;
+   {{end}}
+ }{{ end }}{{ end }}
+
+upstream default {
+  server 127.0.0.1:53;
+}
+
+# Get Source IP from Tags
+map $remote_addr $backend {
+{{ range services }}{{ if .Name | regexMatch "dns.*" }}{{$sname := .Name}}{{with service $sname}}{{ with index . 0 }}{{range .Tags}}{{.}} {{$sname}} ;
+{{end}}{{ end }}{{ end }}{{ end }}{{ end }}
+default default;
+}
+
+
+
+
+server {
+  listen 53 udp;
+  listen 53;
+
+  proxy_pass  $backend;
+  proxy_timeout 1s;
+  proxy_responses 1;
+
+}
