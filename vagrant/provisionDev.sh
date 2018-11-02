@@ -18,4 +18,5 @@ mkdir -p /data/db
 service mongod start
 mongoimport -d saas -c data < /mongodb/schema.json
 exit
-/usr/local/bin/go get github.com/globalsign/mgo
+/usr/local/go/bin/go get github.com/globalsign/mgo
+/usr/local/go/bin/go get -u github.com/gorilla/mux
