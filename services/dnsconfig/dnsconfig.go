@@ -7,7 +7,6 @@ import (
 	"text/template"
   "net/http"
   "log"
-  "encoding/json"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -143,7 +142,7 @@ func getZones(w http.ResponseWriter, r *http.Request, url *string, db *string, c
     // Retrieve ID
     id := mux.Vars(r)["id"]
 
-    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -168,17 +167,10 @@ func getZones(w http.ResponseWriter, r *http.Request, url *string, db *string, c
   		}
     log.Printf("getZones for %s : Got %v", id, z)
 
-    // Translate back to JSON
-    data, err := json.Marshal(z.Zones)
-    if err != nil {
-      w.WriteHeader(http.StatusInternalServerError)
-      fmt.Fprintf(w, "Failed to json marshal")
-      log.Printf("getZones for %s : %v", id, err)
-      return
-    }
-
     // Send zones
-    fmt.Fprintf(w, "%s", data)
+		for _, d := range z.Zones {
+    	fmt.Fprintf(w, "%s\n", d.Domain)
+		}
 }
 
 
