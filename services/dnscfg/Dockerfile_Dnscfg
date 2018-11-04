@@ -1,0 +1,7 @@
+FROM debian:stretch-slim
+
+COPY dnscfg /usr/local/bin/dnscfg
+
+EXPOSE 8053/tcp
+
+CMD ["/bin/bash", "-c","/usr/local/bin/dnscfg -url $MONGOURL"]

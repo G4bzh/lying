@@ -2,11 +2,10 @@ FROM debian:stretch-slim
 
 RUN set -x \
 	&& apt-get update \
-	&& apt-get install --no-install-recommends --no-install-suggests -y bind9 \
+	&& apt-get install --no-install-recommends --no-install-suggests -y bind9 wget\
   && rm -rf /var/lib/apt/lists/*
 
 COPY Dockerfile_Bind_Entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY toZone /etc/bind/
 
 EXPOSE 53/udp 53/tcp
 

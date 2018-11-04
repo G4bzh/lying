@@ -123,7 +123,7 @@ const configTmpl = `options {
 };
 
 logging {
-      channel "querylog" { file "/var/log/dns-query.log"; print-time yes; print-category yes; print-severity yes; };
+      channel "querylog" { stderr; print-time yes; print-category yes; print-severity yes; };
       category queries { querylog; };
 };
 
@@ -143,6 +143,7 @@ func getZones(w http.ResponseWriter, r *http.Request, url *string, db *string, c
     id := mux.Vars(r)["id"]
 
     w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		log.Printf("getZones for %s : Connecting to %s\n", id, *url)
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -294,6 +295,6 @@ func main() {
     }).Methods("GET")
 
 
-  log.Fatal(http.ListenAndServe(":8080", r))
+  log.Fatal(http.ListenAndServe(":8053", r))
 
 }

@@ -69,8 +69,6 @@ services:
       - saas
     environment:
       - MONGODB_REPLICA_SET_MODE=primary
-    volumes:
-      - mongodb_data:/bitnami
     deploy:
       placement:
         constraints:
@@ -81,7 +79,7 @@ services:
   #
   # MongoDB Secondary
   #
-  mongodbSeconday:
+  mongodbSecondary:
     image: bitnami/mongodb:latest
     networks:
       - saas
@@ -93,10 +91,12 @@ services:
       - MONGODB_PRIMARY_PORT_NUMBER=27017
     deploy:
       mode: global
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager
           - node.labels.mongodb != primary
+
 
   #
   # MongoDB arbitrer
@@ -112,13 +112,29 @@ services:
       - MONGODB_PRIMARY_HOST=mongodbPrimary
       - MONGODB_PRIMARY_PORT_NUMBER=27017
 
+
+  #
+  # DNS Config
+  #
+  dnscfg:
+    image: g4bzh/dnscfg:latest
+    networks:
+      - saas
+    environment:
+      - MONGOURL=mongodbSecondary:27017,mongodbPrimary:27017
+    ports:
+      - target: 8053
+        published: 8053
+        protocol: tcp
+    depends_on:
+    - mongodbPrimary
+    deploy:
+      replicas: 2
+
+
 networks:
   saas:
     driver: overlay
     ipam:
       config:
       - subnet: 242.0.0.0/8
-
-volumes:
-  mongodb_data:
-    driver: local

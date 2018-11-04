@@ -2,6 +2,6 @@ vagrant/.vagrant
 vagrant/swarm_token
 services/ngx/consul-template
 services/ngx/simple.conf
-services/bnd/toZone
 services/bnd/named.conf
 services/bnd/*.txt
+services/dnscfg/dnscfg
