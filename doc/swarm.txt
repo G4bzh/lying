@@ -206,7 +206,7 @@ docker build -t g4bzh/bnd  -f Dockerfile_Bind .
 docker login
 docker push  g4bzh/bnd
 
-docker service create --name "dns-foo-bar-com" --network SAAS_saas -e CLIENTID="foo@bar.com" -e MONGOURL="mongodbPrimary:27017,mongodbSecondary:27017" -e SERVICE_TAGS="~^10.*" -e SERVICE_NAME="dns-foo-bar-com" --constraint=node.labels.consul==1 g4bzh/bnd
+docker service create --name "dns-foo-bar-com" --network SAAS_saas -e CLIENTID="foo@bar.com" -e SERVICE_TAGS="~^10.*" -e SERVICE_NAME="dns-foo-bar-com"  g4bzh/bnd
 docker exec -it `docker ps | grep dns | cut -d ' ' -f 1` /bin/bash
 
   root@7bf86586549e:/# env
