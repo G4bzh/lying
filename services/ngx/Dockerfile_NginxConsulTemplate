@@ -1,8 +1,11 @@
 FROM nginx
 
-COPY consul-template /usr/local/bin/
 RUN mkdir -p /consul-template/data
 RUN mkdir -p /consul-template/config
+ADD https://releases.hashicorp.com/consul-template/0.19.5/consul-template_0.19.5_linux_amd64.tgz /tmp
+RUN tar -xvzf /tmp/consul-template_0.19.5_linux_amd64.tgz -C /tmp
+RUN mv /tmp/consul-template /usr/local/bin/
+RUN rm -f /tmp/consul-template_0.19.5_linux_amd64.tgz
 
 RUN rm -f /etc/nginx/nginx.conf
 RUN rm -f /etc/nginx/conf.d/*.conf
