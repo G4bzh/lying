@@ -7,6 +7,8 @@ import (
 	"text/template"
   "net/http"
   "log"
+	"io/ioutil"
+	"encoding/json"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -14,17 +16,11 @@ import (
 )
 
 
-//
-// Common MongoDB Mapping
-//
-
-type ZoneName struct {
-  Domain      string        `bson:"domain" json:"zone"`
-}
 
 //
-// getZone Mongodb Mapping
+//  Mongodb Mapping
 //
+
 type RR	struct {
 	Name  	string        `bson:"name"`
 	Type  	string        `bson:"type"`
@@ -42,31 +38,11 @@ type Zone struct {
 
 type Zones 	[]Zone
 
-type ZoneQuery 	struct {
+type Record 	struct {
 	Id					string				`bson:"_id" json:"id"`
+	Forwarders	[]string			`bson:"forwarders" json:"forwarders`
 	Zones				Zones					`bson:"zones"`
 }
-
-//
-// getConfig MongoDB Mapping
-//
-type ConfigQuery struct {
-  Id					string				`bson:"_id"`
-  Forwarders	[]string			`bson:"forwarders"`
-  Zones       []ZoneName    `bson:"zones"`
-}
-
-
-//
-// getZone MongoDB Mapping
-//
-
-
-type ZonesQuery struct {
-  Id					string				`bson:"_id" json:"id"`
-  Zones       []ZoneName    `bson:"zones"`
-}
-
 
 //
 // Sort RR Slice
@@ -159,7 +135,7 @@ func getZones(w http.ResponseWriter, r *http.Request, url *string, db *string, c
     c := session.DB(*db).C(*col)
 
     // Query to get zones for id
-    var z ZonesQuery
+    var z Record
   	if err = c.Find(bson.M{"_id" : id}).Select(bson.M{"zones.domain": 1}).One(&z); err != nil {
         w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "Id or Zones not found")
@@ -198,7 +174,7 @@ func getConfig(w http.ResponseWriter, r *http.Request, url *string, db *string, 
     c := session.DB(*db).C(*col)
 
     // Query to get config for id
-    var cf ConfigQuery
+    var cf Record
   	if err = c.Find(bson.M{"_id" : id}).Select(bson.M{"zones.domain": 1, "forwarders": 1}).One(&cf); err != nil {
         w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "Id or Zones not found")
@@ -242,7 +218,7 @@ func getZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
     c := session.DB(*db).C(*col)
 
     // Query to get zone detail for id
-    var z ZoneQuery
+    var z Record
     if err = c.Find(bson.M{"_id" : id, "zones.domain" : zone}).Select(bson.M{"zones.$":1}).One(&z); err != nil {
         w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "Id or Zones not found")
@@ -267,6 +243,195 @@ func getZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
   	}
 }
 
+//
+//  /{id} handler
+//
+func getID(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+	// Retrieve ID & Zone
+	id := mux.Vars(r)["id"]
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	// Connect to Database
+	session, err := mgo.Dial(*url)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("getID %s : Connected to %s\n", id, *url)
+	// Read secondaries with consistence
+	session.SetMode(mgo.Monotonic, true)
+	defer session.Close()
+
+	// Get collection object
+	c := session.DB(*db).C(*col)
+
+	// Query to get zone detail for id
+	var i Record
+	if err = c.Find(bson.M{"_id" : id}).Select(bson.M{"_id":1}).One(&i); err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "Id not found")
+		log.Printf("getID %s : %v", id, err)
+		return
+	}
+
+	fmt.Fprintf(w, "%v", i)
+	log.Printf("getID %s : %v", id, i)
+}
+
+
+//
+//  /{id} handler
+//
+func setID(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID & Zone
+    id := mux.Vars(r)["id"]
+
+    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("setID %s : Connected to %s\n", id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Create empty document
+    var i Record
+		i.Id = id
+    if err = c.Insert(&i); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        fmt.Fprintf(w, "Error inserting Id")
+        log.Printf("setID %s : %v", id, err)
+				return
+      }
+
+		fmt.Fprintf(w, "%v", i)
+    log.Printf("setID %s : %v", id, i)
+}
+
+//
+//  /{id} handler
+//
+func removeID(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID & Zone
+    id := mux.Vars(r)["id"]
+
+    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("removeID %s : Connected to %s\n", id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Remove document
+    if err = c.Remove(bson.M{"_id" : id}); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        fmt.Fprintf(w, "Error removing Id")
+        log.Printf("removeID %s : %v", id, err)
+				return
+      }
+
+		fmt.Fprintf(w, "%v", id)
+    log.Printf("removeID %s : OK", id)
+}
+
+
+//
+//  /{id}/forwarders handler
+//
+func getForwarders(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID
+    id := mux.Vars(r)["id"]
+
+    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		log.Printf("getForwarders for %s : Connecting to %s\n", id, *url)
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("getForwarders for %s : Connected to %s\n", id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Query to get forwarders for id
+    var f Record
+  	if err = c.Find(bson.M{"_id" : id}).Select(bson.M{"forwarders": 1}).One(&f); err != nil {
+        w.WriteHeader(http.StatusNotFound)
+        fmt.Fprintf(w, "Id not found")
+  			log.Printf("getForwarders for %s : %v", id, err)
+        return
+  		}
+    log.Printf("getForwarders for %s : Got %v", id, f)
+
+    // Send forwarders
+		for _, d := range f.Forwarders {
+    	fmt.Fprintf(w, "%s\n", d)
+		}
+}
+
+
+func setForwarders(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID
+    id := mux.Vars(r)["id"]
+		b, _ := ioutil.ReadAll(r.Body)
+		var f Record
+
+		if err := json.Unmarshal(b, &f); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Invalid JSON")
+			log.Printf("setForwarders for %s : %v", id, err)
+			return
+		}
+		log.Printf("setForwarders for %s : Got %v", id, f)
+
+
+    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		log.Printf("setForwarders for %s : Connecting to %s\n", id, *url)
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("setForwarders for %s : Connected to %s\n", id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Update forwarders for id
+  	if err = c.Update(bson.M{"_id" : id}, bson.M{"$set": bson.M{"forwarders": f.Forwarders}}); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        fmt.Fprintf(w, "Error setting forwarders")
+  			log.Printf("setForwarders for %s : %v", id, err)
+        return
+  		}
+    log.Printf("setForwarders for %s : set %v", id, f.Forwarders)
+    fmt.Fprintf(w, "%v\n", f.Forwarders)
+
+}
 
 
 //
@@ -294,6 +459,25 @@ func main() {
       getZone(w, r, urlPtr, dbPtr, colPtr)
     }).Methods("GET")
 
+	r.HandleFunc("/{id}", func(w http.ResponseWriter, r *http.Request) {
+      getID(w, r, urlPtr, dbPtr, colPtr)
+    }).Methods("GET")
+
+	r.HandleFunc("/{id}", func(w http.ResponseWriter, r *http.Request) {
+			setID(w, r, urlPtr, dbPtr, colPtr)
+		}).Methods("POST")
+
+	r.HandleFunc("/{id}", func(w http.ResponseWriter, r *http.Request) {
+			removeID(w, r, urlPtr, dbPtr, colPtr)
+		}).Methods("DELETE")
+
+	r.HandleFunc("/{id}/forwarders", func(w http.ResponseWriter, r *http.Request) {
+      getForwarders(w, r, urlPtr, dbPtr, colPtr)
+    }).Methods("GET")
+
+	r.HandleFunc("/{id}/forwarders", func(w http.ResponseWriter, r *http.Request) {
+      setForwarders(w, r, urlPtr, dbPtr, colPtr)
+    }).Methods("POST")
 
   log.Fatal(http.ListenAndServe(":8053", r))
 
