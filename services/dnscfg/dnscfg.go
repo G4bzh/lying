@@ -22,18 +22,18 @@ import (
 //
 
 type RR	struct {
-	Name  	string        `bson:"name"`
-	Type  	string        `bson:"type"`
-	Class  	string        `bson:"class"`
-	TTL  		int			      `bson:"ttl"`
-	Rdata  	string        `bson:"rdata"`
+	Name  	string        `bson:"name" json:"name"`
+	Type  	string        `bson:"type" json:"type"`
+	Class  	string        `bson:"class" json:"class"`
+	TTL  		int			      `bson:"ttl" json:"ttl"`
+	Rdata  	string        `bson:"rdata" json:"rdata"`
 }
 
 type RRs 	[]RR
 
 type Zone struct {
-	Domain  	string        `bson:"domain"`
-	RRs				RRs 					`bson:"rr"`
+	Domain  	string        `bson:"domain" json:"domain,omitempty"`
+	RRs				RRs 					`bson:"rr" json:"rrs,omitempty"`
 }
 
 type Zones 	[]Zone
@@ -41,7 +41,7 @@ type Zones 	[]Zone
 type Record 	struct {
 	Id					string				`bson:"_id" json:"id"`
 	Forwarders	[]string			`bson:"forwarders" json:"forwarders`
-	Zones				Zones					`bson:"zones"`
+	Zones				Zones					`bson:"zones" json:"zones,omitempty"`
 }
 
 //
@@ -247,7 +247,7 @@ func getConfigZone(w http.ResponseWriter, r *http.Request, url *string, db *stri
 //  /{id} handler
 //
 func getID(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
-	// Retrieve ID & Zone
+	// Retrieve ID
 	id := mux.Vars(r)["id"]
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -377,7 +377,7 @@ func getForwarders(w http.ResponseWriter, r *http.Request, url *string, db *stri
     var f Record
   	if err = c.Find(bson.M{"_id" : id}).Select(bson.M{"forwarders": 1}).One(&f); err != nil {
         w.WriteHeader(http.StatusNotFound)
-        fmt.Fprintf(w, "Id not found")
+        fmt.Fprintf(w, "{\"msg\":\"Id not found\"}")
   			log.Printf("getForwarders for %s : %v", id, err)
         return
   		}
@@ -387,7 +387,7 @@ func getForwarders(w http.ResponseWriter, r *http.Request, url *string, db *stri
 		b, err := json.Marshal(f.Forwarders)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Invalid JSON")
+			fmt.Fprintf(w, "{\"msg\":\"Invalid JSON\"}")
 			log.Printf("getForwarders for %s : %v", id, err)
 			return
 		}
@@ -439,6 +439,97 @@ func setForwarders(w http.ResponseWriter, r *http.Request, url *string, db *stri
 
 }
 
+//
+//  /{id}/zones handler
+//
+func getZones(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID
+    id := mux.Vars(r)["id"]
+
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		log.Printf("getZones for %s : Connecting to %s\n", id, *url)
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("getZones for %s : Connected to %s\n", id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Query to get zones for id
+    var z Record
+  	if err = c.Find(bson.M{"_id" : id}).Select(bson.M{"zones.domain": 1}).One(&z); err != nil {
+        w.WriteHeader(http.StatusNotFound)
+        fmt.Fprintf(w, "{\"msg\":\"Id not found\"}")
+  			log.Printf("getZones for %s : %v", id, err)
+        return
+  		}
+    log.Printf("getZones for %s : Got %v", id, z)
+
+    // Send Zones
+		b, err := json.Marshal(z.Zones)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "{\"msg\":\"Invalid JSON\"}")
+			log.Printf("getZones for %s : %v", id, err)
+			return
+		}
+    fmt.Fprintf(w, "%s", string(b))
+
+}
+
+//
+//  /{id}/zone/{zone} handler
+//
+func getZone(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID & zone
+    id := mux.Vars(r)["id"]
+		zone := mux.Vars(r)["zone"]
+
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		log.Printf("getZone %s for %s : Connecting to %s\n", zone, id, *url)
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("getZone %s for %s : Connected to %s\n", zone, id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Query to get forwarders for id
+    var z Record
+  	if err = c.Find(bson.M{"_id" : id, "zones.domain" : zone}).Select(bson.M{"zones.$":1}).One(&z); err != nil {
+        w.WriteHeader(http.StatusNotFound)
+        fmt.Fprintf(w, "{\"msg\":\"Id or Zone not found\"}")
+  			log.Printf("getZone %s for %s : %v", zone, id, err)
+        return
+  		}
+    log.Printf("getZone %s for %s : Got %v", zone, id, z)
+
+    // Send zone[0]
+		b, err := json.Marshal(z.Zones[0])
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "{\"msg\":\"Invalid JSON\"}")
+			log.Printf("getZone %s for %s : %v", zone, id, err)
+			return
+		}
+    fmt.Fprintf(w, "%s", string(b))
+
+}
+
 
 //
 // Main
@@ -484,6 +575,14 @@ func main() {
 	r.HandleFunc("/{id}/forwarders", func(w http.ResponseWriter, r *http.Request) {
       setForwarders(w, r, urlPtr, dbPtr, colPtr)
     }).Methods("POST")
+
+	r.HandleFunc("/{id}/zones", func(w http.ResponseWriter, r *http.Request) {
+      getZones(w, r, urlPtr, dbPtr, colPtr)
+    }).Methods("GET")
+
+	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+      getZone(w, r, urlPtr, dbPtr, colPtr)
+    }).Methods("GET")
 
   log.Fatal(http.ListenAndServe(":8053", r))
 
