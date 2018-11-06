@@ -531,6 +531,61 @@ func getZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
 }
 
 
+func setZone(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID & zone
+    id := mux.Vars(r)["id"]
+		zone := mux.Vars(r)["zone"]
+
+		b, _ := ioutil.ReadAll(r.Body)
+		var u Zone
+
+		if err := json.Unmarshal(b, &u); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "{\"msg\":\"Invalid JSON\"}")
+			log.Printf("setZone %s for %s : %v", zone, id, err)
+			return
+		}
+		log.Printf("setZone %s for %s : Got %v", zone, id, u)
+
+
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		log.Printf("setZone %s for %s : Connecting to %s\n", zone, id, *url)
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("setZone %s for %s : Connected to %s\n", zone, id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Query to remove zone for id if it exists
+  	if err = c.Update(bson.M{"_id" : id}, bson.M{"$pull": bson.M{"zones": bson.M{"domain": u.Domain}}}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+      fmt.Fprintf(w, "{\"msg\":\"U Error while pulling data\"}")
+			log.Printf("setZone %s for %s : %v", zone, id, err)
+      return
+		}
+
+		// Query to add zone for id
+		if err = c.Update(bson.M{"_id" : id}, bson.M{"$push": bson.M{"zones": u}}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+      fmt.Fprintf(w, "{\"msg\":\"U Error while pushing data\"}")
+			log.Printf("setZone %s for %s : %v", zone, id, err)
+      return
+		}
+
+    log.Printf("setZone %s for %s : set %v", zone, id, u)
+    fmt.Fprintf(w, "%s", string(b))
+
+}
+
+
 //
 // Main
 //
@@ -583,6 +638,10 @@ func main() {
 	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
       getZone(w, r, urlPtr, dbPtr, colPtr)
     }).Methods("GET")
+
+	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+      setZone(w, r, urlPtr, dbPtr, colPtr)
+    }).Methods("POST")
 
   log.Fatal(http.ListenAndServe(":8053", r))
 
