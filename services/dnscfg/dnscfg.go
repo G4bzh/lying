@@ -357,7 +357,7 @@ func getForwarders(w http.ResponseWriter, r *http.Request, url *string, db *stri
     // Retrieve ID
     id := mux.Vars(r)["id"]
 
-    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		log.Printf("getForwarders for %s : Connecting to %s\n", id, *url)
 
     // Connect to Database
@@ -384,9 +384,15 @@ func getForwarders(w http.ResponseWriter, r *http.Request, url *string, db *stri
     log.Printf("getForwarders for %s : Got %v", id, f)
 
     // Send forwarders
-		for _, d := range f.Forwarders {
-    	fmt.Fprintf(w, "%s\n", d)
+		b, err := json.Marshal(f.Forwarders)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Invalid JSON")
+			log.Printf("getForwarders for %s : %v", id, err)
+			return
 		}
+    fmt.Fprintf(w, "%s", string(b))
+
 }
 
 
