@@ -32,7 +32,7 @@ type RR	struct {
 type RRs 	[]RR
 
 type Zone struct {
-	Domain  	string        `bson:"domain" json:"domain,omitempty"`
+	Domain  	string        `bson:"domain" json:"domain"`
 	RRs				RRs 					`bson:"rr" json:"rrs,omitempty"`
 }
 
