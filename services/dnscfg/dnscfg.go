@@ -112,9 +112,9 @@ zone "{{.Domain}}" {
 `
 
 //
-//  /{id}/zones handler
+//  /{id}/config/zones handler
 //
-func getZones(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+func getConfigZones(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
     // Retrieve ID
     id := mux.Vars(r)["id"]
 
@@ -195,9 +195,9 @@ func getConfig(w http.ResponseWriter, r *http.Request, url *string, db *string, 
 
 
 //
-//  /{id}/zone{zone} handler
+//  /{id}/config/zone/{zone} handler
 //
-func getZone(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+func getConfigZone(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
     // Retrieve ID & Zone
     id := mux.Vars(r)["id"]
     zone := mux.Vars(r)["zone"]
@@ -447,16 +447,16 @@ func main() {
 
   r := mux.NewRouter()
 
-  r.HandleFunc("/{id}/zones", func(w http.ResponseWriter, r *http.Request) {
-      getZones(w, r, urlPtr, dbPtr, colPtr)
+  r.HandleFunc("/{id}/config/zones", func(w http.ResponseWriter, r *http.Request) {
+      getConfigZones(w, r, urlPtr, dbPtr, colPtr)
     }).Methods("GET")
 
   r.HandleFunc("/{id}/config", func(w http.ResponseWriter, r *http.Request) {
       getConfig(w, r, urlPtr, dbPtr, colPtr)
     }).Methods("GET")
 
-  r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
-      getZone(w, r, urlPtr, dbPtr, colPtr)
+  r.HandleFunc("/{id}/config/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+      getConfigZone(w, r, urlPtr, dbPtr, colPtr)
     }).Methods("GET")
 
 	r.HandleFunc("/{id}", func(w http.ResponseWriter, r *http.Request) {
