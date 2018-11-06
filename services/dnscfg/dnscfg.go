@@ -119,7 +119,6 @@ func getConfigZones(w http.ResponseWriter, r *http.Request, url *string, db *str
     id := mux.Vars(r)["id"]
 
     w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		log.Printf("getZones for %s : Connecting to %s\n", id, *url)
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -358,7 +357,6 @@ func getForwarders(w http.ResponseWriter, r *http.Request, url *string, db *stri
     id := mux.Vars(r)["id"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		log.Printf("getForwarders for %s : Connecting to %s\n", id, *url)
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -412,7 +410,6 @@ func setForwarders(w http.ResponseWriter, r *http.Request, url *string, db *stri
 
 
     w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		log.Printf("setForwarders for %s : Connecting to %s\n", id, *url)
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -447,7 +444,6 @@ func getZones(w http.ResponseWriter, r *http.Request, url *string, db *string, c
     id := mux.Vars(r)["id"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		log.Printf("getZones for %s : Connecting to %s\n", id, *url)
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -493,7 +489,6 @@ func getZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
 		zone := mux.Vars(r)["zone"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		log.Printf("getZone %s for %s : Connecting to %s\n", zone, id, *url)
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -549,7 +544,6 @@ func setZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
 
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		log.Printf("setZone %s for %s : Connecting to %s\n", zone, id, *url)
 
     // Connect to Database
     session, err := mgo.Dial(*url)
@@ -567,7 +561,7 @@ func setZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
     // Query to remove zone for id if it exists
   	if err = c.Update(bson.M{"_id" : id}, bson.M{"$pull": bson.M{"zones": bson.M{"domain": u.Domain}}}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-      fmt.Fprintf(w, "{\"msg\":\"U Error while pulling data\"}")
+      fmt.Fprintf(w, "{\"msg\":\"Error while pulling data\"}")
 			log.Printf("setZone %s for %s : %v", zone, id, err)
       return
 		}
@@ -575,7 +569,7 @@ func setZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
 		// Query to add zone for id
 		if err = c.Update(bson.M{"_id" : id}, bson.M{"$push": bson.M{"zones": u}}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-      fmt.Fprintf(w, "{\"msg\":\"U Error while pushing data\"}")
+      fmt.Fprintf(w, "{\"msg\":\"Error while pushing data\"}")
 			log.Printf("setZone %s for %s : %v", zone, id, err)
       return
 		}
@@ -585,6 +579,40 @@ func setZone(w http.ResponseWriter, r *http.Request, url *string, db *string, co
 
 }
 
+
+
+func removeZone(w http.ResponseWriter, r *http.Request, url *string, db *string, col *string) {
+    // Retrieve ID & zone
+    id := mux.Vars(r)["id"]
+		zone := mux.Vars(r)["zone"]
+
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+    // Connect to Database
+    session, err := mgo.Dial(*url)
+    if err != nil {
+      panic(err)
+    }
+    log.Printf("removeZone %s for %s : Connected to %s\n", zone, id, *url)
+    // Read secondaries with consistence
+    session.SetMode(mgo.Monotonic, true)
+    defer session.Close()
+
+    // Get collection object
+    c := session.DB(*db).C(*col)
+
+    // Query to remove zone for id if it exists
+  	if err = c.Update(bson.M{"_id" : id}, bson.M{"$pull": bson.M{"zones": bson.M{"domain": zone}}}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+      fmt.Fprintf(w, "{\"msg\":\"Error while pulling data\"}")
+			log.Printf("removeZone %s for %s : %v", zone, id, err)
+      return
+		}
+
+    log.Printf("removeZone %s for %s :OK", zone, id)
+    fmt.Fprintf(w, "{\"msg\":\"OK\"}")
+
+}
 
 //
 // Main
@@ -642,6 +670,10 @@ func main() {
 	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
       setZone(w, r, urlPtr, dbPtr, colPtr)
     }).Methods("POST")
+
+	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+      removeZone(w, r, urlPtr, dbPtr, colPtr)
+    }).Methods("DELETE")
 
   log.Fatal(http.ListenAndServe(":8053", r))
 
