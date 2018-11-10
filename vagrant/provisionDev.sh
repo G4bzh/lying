@@ -5,6 +5,11 @@ echo "Provisioning bind virtual machine..."
 
 sudo su -
 apt-get update -y
+apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+apt-get update -y
+apt-get install docker-ce
 wget https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz
 tar -xvzf go1.11.1.linux-amd64.tar.gz -C /usr/local/
 echo "export PATH=$PATH:/usr/local/go/bin" > /etc/profile

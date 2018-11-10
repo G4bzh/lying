@@ -121,7 +121,9 @@ services:
     networks:
       - saas
     environment:
-      - MONGOURL=mongodbSecondary:27017,mongodbPrimary:27017
+      - DBURL=mongodbSecondary:27017,mongodbPrimary:27017
+      - DB=dnscfg
+      - DBCOL=data
     ports:
       - target: 8053
         published: 8053

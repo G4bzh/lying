@@ -187,7 +187,7 @@ func getConfig(w http.ResponseWriter, r *http.Request, url *string, db *string, 
   	if err = tmpl.Execute(w, cf); err != nil {
       w.WriteHeader(http.StatusInternalServerError)
       fmt.Fprintf(w, "Failed to execute template")
-      log.Printf("getZones for %s : %v", id, err)
+      log.Printf("getConfig for %s : %v", id, err)
       return
   	}
 }
@@ -620,7 +620,7 @@ func removeZone(w http.ResponseWriter, r *http.Request, url *string, db *string,
 func main() {
 
 	urlPtr := flag.String("url","127.0.0.1:27017","MongoDB URL")
-	dbPtr := flag.String("db","saas","MongoDB Database")
+	dbPtr := flag.String("db","dnscfg","MongoDB Database")
 	colPtr := flag.String("col","data","MongoDB Collection")
 
 	flag.Parse()
