@@ -5,6 +5,7 @@ import (
   "flag"
   "log"
   "time"
+	"strings"
   "net/http"
   "crypto/sha256"
   "encoding/json"
@@ -32,6 +33,7 @@ type User struct {
 //
 
 var session *mgo.Session
+var signature = []byte("secret")
 
 //
 // Login
@@ -39,7 +41,6 @@ var session *mgo.Session
 func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 
   var u User
-  var signature = []byte("secret")
 
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
@@ -82,7 +83,7 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
 
   // Create Claim for token
   claims := &jwt.StandardClaims {
-    ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+    ExpiresAt: time.Now().Add(time.Hour * -24).Unix(),
     Issuer: "lying",
     Id: u.Id,
   }
@@ -98,8 +99,77 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
   }
   log.Printf("authLogin :Token %s", tokenString)
   w.Write([]byte(tokenString))
-  
+
 }
+
+//
+// Test
+//
+
+func authTest(w http.ResponseWriter, r *http.Request, db *string, col *string) {
+
+	// Get header
+	hdr := r.Header.Get("Authorization")
+
+	// Check header is present
+	if ( hdr == "" )	{
+		w.WriteHeader(http.StatusForbidden)
+    fmt.Fprintf(w, "Not Allowed")
+    log.Printf("authTest : No header")
+    return
+	}
+
+	// Look for Bearer
+	hdrvalue := strings.Fields(hdr)
+	if ( len(hdrvalue) != 2 ) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "Not Allowed")
+		log.Printf("authTest : Wrong header value %q", hdrvalue)
+		return
+	}
+
+	if ( hdrvalue[0] != "Bearer" ) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "Not Allowed")
+		log.Printf("authTest : No Bearer keyword, Got %s", hdrvalue[0])
+		return
+	}
+
+	// Finally, get token
+	tokenString := hdrvalue[1]
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			// Check signing method
+			log.Printf("authTest : Unexpected signing method %v", token.Header["alg"])
+			return nil, fmt.Errorf("")
+	 	}
+    return signature, nil
+	})
+
+	if (err != nil)	{
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "Not Allowed")
+		log.Printf("authTest : Unable to parse token  %v", err)
+		return
+	}
+
+	// Check validity ans issuer
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if ( claims["iss"] == "lying" ){
+			log.Printf("authTest : request Allowed")
+			fmt.Fprintf(w,"Hello %v", claims["jti"])
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusForbidden)
+	fmt.Fprintf(w, "Not Allowed")
+	log.Printf("authTest : Invalid  Token or Claims")
+
+	return
+}
+
+
 
 //
 // Main
@@ -127,10 +197,14 @@ func main() {
 	session.SetMode(mgo.Monotonic, true)
 
 
-
+	// Routes
   r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
       authLogin(w, r, dbPtr, colPtr)
     }).Methods("POST")
+
+	r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+      authTest(w, r, dbPtr, colPtr)
+    }).Methods("GET")
 
 
 	defer session.Close()

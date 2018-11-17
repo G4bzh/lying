@@ -21,7 +21,6 @@ apt-get update -y
 apt-get install -y --allow-unauthenticated mongodb-org
 mkdir -p /data/db
 service mongod start
-mongoimport -d saas -c data < /mongodb/schema.json
 exit
 /usr/local/go/bin/go get github.com/globalsign/mgo
 /usr/local/go/bin/go get github.com/gorilla/mux

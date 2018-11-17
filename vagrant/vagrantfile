@@ -50,7 +50,6 @@ Vagrant.configure("2") do |config|
     dev.vm.network "forwarded_port", guest: 8080, host: 9080
     dev.vm.network "forwarded_port", guest: 8053, host: 9053
     dev.vm.provision "shell", path: "provisionDev.sh"
-    dev.vm.synced_folder "../mongodb", "/mongodb"
     dev.vm.synced_folder "../services", "/services"
 
   end
