@@ -27,5 +27,5 @@ mongoimport -d auth -c data --drop < /services/auth/schema.json
 exit
 /usr/local/go/bin/go get -u github.com/globalsign/mgo
 /usr/local/go/bin/go get github.com/gorilla/mux
- /usr/local/go/bin/go get github.com/gorilla/context
+/usr/local/go/bin/go get github.com/gorilla/context
 /usr/local/go/bin/go get github.com/dgrijalva/jwt-go

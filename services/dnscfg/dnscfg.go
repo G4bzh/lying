@@ -1,9 +1,11 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"sort"
 	"flag"
+	"strings"
 	"text/template"
   "net/http"
   "log"
@@ -13,6 +15,9 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
   "github.com/gorilla/mux"
+	"github.com/gorilla/context"
+	jwt "github.com/dgrijalva/jwt-go"
+
 )
 
 
@@ -111,14 +116,89 @@ zone "{{.Domain}}" {
 {{end}}
 `
 
+//
+// Types
+//
+
+type handlerF func(w http.ResponseWriter, r *http.Request)
+
 
 //
 // Globals
 //
 
 var session *mgo.Session
+var signature []byte
+var issuer string
 
+//
+// Auth Middleware
+//
+func middlewareAuth(next handlerF) handlerF {
+  return handlerF(func(w http.ResponseWriter, r *http.Request) {
 
+		// Get header
+		hdr := r.Header.Get("Authorization")
+
+		// Check header is present
+		if ( hdr == "" )	{
+			w.WriteHeader(http.StatusForbidden)
+	    fmt.Fprintf(w, "Not Allowed")
+	    log.Printf("middlewareAuth : No header")
+	    return
+		}
+
+		// Look for Bearer
+		hdrvalue := strings.Fields(hdr)
+		if ( len(hdrvalue) != 2 ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "Not Allowed")
+			log.Printf("middlewareAuth : Wrong header value %q", hdrvalue)
+			return
+		}
+
+		if ( hdrvalue[0] != "Bearer" ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "Not Allowed")
+			log.Printf("middlewareAuth : No Bearer keyword, Got %s", hdrvalue[0])
+			return
+		}
+
+		// Finally, get token
+		tokenString := hdrvalue[1]
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				// Check signing method
+				log.Printf("middlewareAuth : Unexpected signing method %v", token.Header["alg"])
+				return nil, fmt.Errorf("")
+		 	}
+	    return signature, nil
+		})
+
+		if (err != nil)	{
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "Not Allowed")
+			log.Printf("middlewareAuth : Unable to parse token  %v", err)
+			return
+		}
+
+		// Check validity ans issuer
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			if ( claims["iss"] == issuer ){
+				// OK, go to next handler
+				context.Set(r, "clientID", claims["jti"])
+				log.Printf("middlewareAuth : Auth successfull")
+				next(w, r)
+				return
+			}
+		}
+
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "Not Allowed")
+		log.Printf("middlewareAuth : Invalid  Token or Claims")
+
+  })
+}
 
 //
 //  /{id}/config/zones handler
@@ -409,6 +489,14 @@ func getZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("getZone : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
+
     // Get collection object
     c := session.DB(*db).C(*col)
 
@@ -509,12 +597,25 @@ func removeZone(w http.ResponseWriter, r *http.Request, db *string, col *string)
 func main() {
 
 	var err error
+	var env string
 
 	urlPtr := flag.String("url","127.0.0.1:27017","MongoDB URL")
 	dbPtr := flag.String("db","dnscfg","MongoDB Database")
 	colPtr := flag.String("col","data","MongoDB Collection")
 
 	flag.Parse()
+
+	if env = os.Getenv("JWT_ISSUER"); env == "" {
+		panic("No JWT_ISSUER env variable.")
+		return
+	}
+	issuer = env
+
+	if env = os.Getenv("JWT_SIGNATURE"); env == "" {
+		panic("No JWT_SIGNATURE env variable.")
+		return
+	}
+	signature = []byte(env)
 
   r := mux.NewRouter()
 
@@ -565,9 +666,9 @@ func main() {
       getZones(w, r,  dbPtr, colPtr)
     }).Methods("GET")
 
-	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       getZone(w, r, dbPtr, colPtr)
-    }).Methods("GET")
+    })).Methods("GET")
 
 	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
       setZone(w, r, dbPtr, colPtr)
