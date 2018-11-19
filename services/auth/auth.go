@@ -6,7 +6,6 @@ import (
   "flag"
   "log"
   "time"
-	"strings"
   "net/http"
   "crypto/sha256"
   "encoding/json"
@@ -17,7 +16,6 @@ import (
   "github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
   "github.com/gorilla/mux"
-	"github.com/gorilla/context"
 )
 
 //
@@ -29,11 +27,6 @@ type User struct {
 	Hash				string				`bson:"hash" json:"password"`
 }
 
-//
-// Types
-//
-
-type handlerF func(w http.ResponseWriter, r *http.Request)
 
 //
 // Globals
@@ -110,85 +103,6 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
 
 }
 
-//
-// Test
-//
-
-
-func middlewareAuth(next handlerF) handlerF {
-  return handlerF(func(w http.ResponseWriter, r *http.Request) {
-
-		// Get header
-		hdr := r.Header.Get("Authorization")
-
-		// Check header is present
-		if ( hdr == "" )	{
-			w.WriteHeader(http.StatusForbidden)
-	    fmt.Fprintf(w, "Not Allowed")
-	    log.Printf("authTest : No header")
-	    return
-		}
-
-		// Look for Bearer
-		hdrvalue := strings.Fields(hdr)
-		if ( len(hdrvalue) != 2 ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "Not Allowed")
-			log.Printf("authTest : Wrong header value %q", hdrvalue)
-			return
-		}
-
-		if ( hdrvalue[0] != "Bearer" ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "Not Allowed")
-			log.Printf("authTest : No Bearer keyword, Got %s", hdrvalue[0])
-			return
-		}
-
-		// Finally, get token
-		tokenString := hdrvalue[1]
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				// Check signing method
-				log.Printf("authTest : Unexpected signing method %v", token.Header["alg"])
-				return nil, fmt.Errorf("")
-		 	}
-	    return signature, nil
-		})
-
-		if (err != nil)	{
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "Not Allowed")
-			log.Printf("authTest : Unable to parse token  %v", err)
-			return
-		}
-
-		// Check validity ans issuer
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			if ( claims["iss"] == "lying" ){
-				// OK, go to next handler
-				context.Set(r, "clientID", claims["jti"])
-				next(w, r)
-				return
-			}
-		}
-
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprintf(w, "Not Allowed")
-		log.Printf("authTest : Invalid  Token or Claims")
-
-  })
-}
-
-
-func authTest(w http.ResponseWriter, r *http.Request, db *string, col *string) {
-
-	log.Printf("authTest : request Allowed")
-	fmt.Fprintf(w,"Hello %s",context.Get(r, "clientID"))
-
-	return
-}
-
 
 
 //
@@ -199,7 +113,7 @@ func main() {
 
 	var err error
 	var env string
-	
+
 	urlPtr := flag.String("url","127.0.0.1:27017","MongoDB URL")
 	dbPtr := flag.String("db","auth","MongoDB Database")
 	colPtr := flag.String("col","data","MongoDB Collection")
@@ -234,10 +148,6 @@ func main() {
   r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
       authLogin(w, r, dbPtr, colPtr)
     }).Methods("POST")
-
-	r.HandleFunc("/login", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
-      authTest(w, r, dbPtr, colPtr)
-    })).Methods("GET")
 
 
 	defer session.Close()
