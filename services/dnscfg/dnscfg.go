@@ -308,7 +308,7 @@ func getID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 	// Retrieve ID
 	id := mux.Vars(r)["id"]
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	// Get collection object
 	c := session.DB(*db).C(*col)
@@ -317,12 +317,12 @@ func getID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 	var i Record
 	if err := c.Find(bson.M{"_id" : id}).Select(bson.M{"_id":1}).One(&i); err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "Id not found")
+		fmt.Fprintf(w, "{\"msg\":\"Id not found\"}")
 		log.Printf("getID %s : %v", id, err)
 		return
 	}
 
-	fmt.Fprintf(w, "%v", i)
+	fmt.Fprintf(w, "{\"msg\":\"OK\"}")
 	log.Printf("getID %s : %v", id, i)
 }
 
@@ -334,7 +334,7 @@ func setID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID & Zone
     id := mux.Vars(r)["id"]
 
-    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -344,12 +344,12 @@ func setID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 		i.Id = id
     if err := c.Insert(&i); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(w, "Error inserting Id")
+        fmt.Fprintf(w, "{\"msg\":\"Error inserting Id\"}")
         log.Printf("setID %s : %v", id, err)
 				return
       }
 
-		fmt.Fprintf(w, "%v", i)
+		fmt.Fprintf(w, "{\"msg\":\"OK\"}")
     log.Printf("setID %s : %v", id, i)
 }
 
@@ -360,7 +360,7 @@ func removeID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID & Zone
     id := mux.Vars(r)["id"]
 
-    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -368,12 +368,12 @@ func removeID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Remove document
     if err := c.Remove(bson.M{"_id" : id}); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(w, "Error removing Id")
+        fmt.Fprintf(w, "{\"msg\":\"Error removing Id\"}")
         log.Printf("removeID %s : %v", id, err)
 				return
       }
 
-		fmt.Fprintf(w, "%v", id)
+		fmt.Fprintf(w, "{\"msg\":\"OK\"}")
     log.Printf("removeID %s : OK", id)
 }
 
@@ -421,14 +421,14 @@ func setForwarders(w http.ResponseWriter, r *http.Request, db *string, col *stri
 
 		if err := json.Unmarshal(b, &f); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Invalid JSON")
+			fmt.Fprintf(w, "{\"msg\":\"Invalid JSON\"}")
 			log.Printf("setForwarders for %s : %v", id, err)
 			return
 		}
 		log.Printf("setForwarders for %s : Got %v", id, f)
 
 
-    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -436,12 +436,12 @@ func setForwarders(w http.ResponseWriter, r *http.Request, db *string, col *stri
     // Update forwarders for id
   	if err := c.Update(bson.M{"_id" : id}, bson.M{"$set": bson.M{"forwarders": f.Forwarders}}); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(w, "Error setting forwarders")
+        fmt.Fprintf(w, "{\"msg\":\"Error setting forwarders\"}")
   			log.Printf("setForwarders for %s : %v", id, err)
         return
   		}
     log.Printf("setForwarders for %s : set %v", id, f.Forwarders)
-    fmt.Fprintf(w, "%v\n", f.Forwarders)
+    fmt.Fprintf(w, "{\"msg\":\"OK\"}")
 
 }
 

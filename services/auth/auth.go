@@ -43,13 +43,13 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
 
   var u User
 
-  w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+  w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
   // Get Post Data
   b, _ := ioutil.ReadAll(r.Body)
   if err := json.Unmarshal(b, &u); err != nil {
     w.WriteHeader(http.StatusInternalServerError)
-    fmt.Fprintf(w, "Invalid JSON")
+    fmt.Fprintf(w, "{\"msg\":\"Invalid JSON\"}")
     log.Printf("authLogin : %v", err)
     return
   }
@@ -66,7 +66,7 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
   // Fetch user record
   if err := c.Find(bson.M{"_id" : u.Id}).Select(nil).One(&u); err != nil {
       w.WriteHeader(http.StatusNotFound)
-      fmt.Fprintf(w, "Id not found or wrong password")
+      fmt.Fprintf(w, "{\"msg\":\"Id not found or wrong password\"}")
       log.Printf("authLogin : %v", err)
       return
     }
@@ -75,7 +75,7 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
   // Compare hashes
   if ( u.Hash != hex.EncodeToString(h.Sum(nil)) ) {
     w.WriteHeader(http.StatusNotFound)
-    fmt.Fprintf(w, "Id not found or wrong password")
+    fmt.Fprintf(w, "{\"msg\":\"Id not found or wrong password\"}")
     log.Printf("authLogin : hashes mismatch")
     return
   }
@@ -85,7 +85,7 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
   // Create Claim for token
   claims := &jwt.StandardClaims {
     ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-    Issuer: "lying",
+    Issuer: issuer,
     Id: u.Id,
   }
 
@@ -94,12 +94,12 @@ func authLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) 
   tokenString, err := token.SignedString(signature)
   if (err != nil) {
     w.WriteHeader(http.StatusInternalServerError)
-    fmt.Fprintf(w, "Token error")
+    fmt.Fprintf(w, "{\"msg\":\"Token error\"}")
     log.Printf("authLogin : %v", err)
     return
   }
   log.Printf("authLogin :Token %s", tokenString)
-  w.Write([]byte(tokenString))
+	fmt.Fprintf(w, "{\"token\":\"%s\"}", tokenString)
 
 }
 
@@ -145,7 +145,7 @@ func main() {
 
 
 	// Routes
-  r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+  r.HandleFunc("/v1/login", func(w http.ResponseWriter, r *http.Request) {
       authLogin(w, r, dbPtr, colPtr)
     }).Methods("POST")
 
