@@ -5,7 +5,7 @@
    |    --------------------> | Client UI |------> | API GW | <----------->  | Auth | -------->  | DB | DB |
   / \                         +-----------+        +--------+     JWT        +------+            +----+----+
  Client                          Vue.js             Traefik  \
-                                                              \
+                                                or Ambassador \
    |                                                           \
    | DNS Request                                                \
    |                                                             \
