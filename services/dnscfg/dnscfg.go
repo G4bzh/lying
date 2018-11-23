@@ -217,10 +217,10 @@ func getConfigZones(w http.ResponseWriter, r *http.Request, db *string, col *str
   	if err := c.Find(bson.M{"_id" : id}).Select(bson.M{"zones.domain": 1}).One(&z); err != nil {
         w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "Id or Zones not found")
-  			log.Printf("getZones for %s : %v", id, err)
+  			log.Printf("getConfigZones for %s : %v", id, err)
         return
   		}
-    log.Printf("getZones for %s : Got %v", id, z)
+    log.Printf("getConfigZones for %s : Got %v", id, z)
 
     // Send zones
 		for _, d := range z.Zones {
@@ -280,10 +280,10 @@ func getConfigZone(w http.ResponseWriter, r *http.Request, db *string, col *stri
     if err := c.Find(bson.M{"_id" : id, "zones.domain" : zone}).Select(bson.M{"zones.$":1}).One(&z); err != nil {
         w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "Id or Zones not found")
-        log.Printf("getZone %s for %s : %v", zone, id, err)
+        log.Printf("getConfigZone %s for %s : %v", zone, id, err)
         return
       }
-    log.Printf("getZone %s for %s : Got data", zone, id)
+    log.Printf("getConfigZone %s for %s : Got data", zone, id)
 
     for _, d := range z.Zones {
       // Sort data
@@ -294,7 +294,7 @@ func getConfigZone(w http.ResponseWriter, r *http.Request, db *string, col *stri
   		if err := tmpl.Execute(w, d); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(w, "Failed to execute template")
-        log.Printf("getZone %s for %s : %v", zone, id, err)
+        log.Printf("getConfigZone %s for %s : %v", zone, id, err)
         return
   		}
 
@@ -309,6 +309,14 @@ func getID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 	id := mux.Vars(r)["id"]
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	// Check ClientID from authMiddleware
+	if ( context.Get(r, "clientID") != id ) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+		log.Printf("getID : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+		return
+	}
 
 	// Get collection object
 	c := session.DB(*db).C(*col)
@@ -336,6 +344,14 @@ func setID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("setID : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
+
     // Get collection object
     c := session.DB(*db).C(*col)
 
@@ -362,6 +378,14 @@ func removeID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("removeID : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
+
     // Get collection object
     c := session.DB(*db).C(*col)
 
@@ -386,6 +410,14 @@ func getForwarders(w http.ResponseWriter, r *http.Request, db *string, col *stri
     id := mux.Vars(r)["id"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("getForwarders : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -416,6 +448,18 @@ func getForwarders(w http.ResponseWriter, r *http.Request, db *string, col *stri
 func setForwarders(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID
     id := mux.Vars(r)["id"]
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("setForwarders : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
+
+
 		b, _ := ioutil.ReadAll(r.Body)
 		var f Record
 
@@ -426,9 +470,6 @@ func setForwarders(w http.ResponseWriter, r *http.Request, db *string, col *stri
 			return
 		}
 		log.Printf("setForwarders for %s : Got %v", id, f)
-
-
-    w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -453,6 +494,14 @@ func getZones(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     id := mux.Vars(r)["id"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("getZones : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -528,6 +577,16 @@ func setZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     id := mux.Vars(r)["id"]
 		zone := mux.Vars(r)["zone"]
 
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("setZone : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
+
 		b, _ := ioutil.ReadAll(r.Body)
 		var u Zone
 
@@ -539,8 +598,6 @@ func setZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 		}
 		log.Printf("setZone %s for %s : Got %v", zone, id, u)
 
-
-    w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -574,6 +631,14 @@ func removeZone(w http.ResponseWriter, r *http.Request, db *string, col *string)
 		zone := mux.Vars(r)["zone"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		// Check ClientID from authMiddleware
+		if ( context.Get(r, "clientID") != id ) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
+			log.Printf("removeZone : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
+			return
+		}
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -630,53 +695,53 @@ func main() {
 
 
 
-  r.HandleFunc("/{id}/config/zones", func(w http.ResponseWriter, r *http.Request) {
+  r.HandleFunc("/v1/private/{id}/config/zones", func(w http.ResponseWriter, r *http.Request) {
       getConfigZones(w, r, dbPtr, colPtr)
     }).Methods("GET")
 
-  r.HandleFunc("/{id}/config", func(w http.ResponseWriter, r *http.Request) {
+  r.HandleFunc("/v1/private/{id}/config", func(w http.ResponseWriter, r *http.Request) {
       getConfig(w, r, dbPtr, colPtr)
     }).Methods("GET")
 
-  r.HandleFunc("/{id}/config/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+  r.HandleFunc("/v1/private/{id}/config/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
       getConfigZone(w, r,  dbPtr, colPtr)
     }).Methods("GET")
 
-	r.HandleFunc("/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       getID(w, r, dbPtr, colPtr)
-    }).Methods("GET")
+    })).Methods("GET")
 
-	r.HandleFunc("/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
 			setID(w, r, dbPtr, colPtr)
-		}).Methods("POST")
+		})).Methods("POST")
 
-	r.HandleFunc("/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
 			removeID(w, r, dbPtr, colPtr)
-		}).Methods("DELETE")
+		})).Methods("DELETE")
 
-	r.HandleFunc("/{id}/forwarders", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}/forwarders", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       getForwarders(w, r, dbPtr, colPtr)
-    }).Methods("GET")
+    })).Methods("GET")
 
-	r.HandleFunc("/{id}/forwarders", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}/forwarders", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       setForwarders(w, r, dbPtr, colPtr)
-    }).Methods("POST")
+    })).Methods("POST")
 
-	r.HandleFunc("/{id}/zones", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}/zones", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       getZones(w, r,  dbPtr, colPtr)
-    }).Methods("GET")
+    })).Methods("GET")
 
-	r.HandleFunc("/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       getZone(w, r, dbPtr, colPtr)
     })).Methods("GET")
 
-	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       setZone(w, r, dbPtr, colPtr)
-    }).Methods("POST")
+    })).Methods("POST")
 
-	r.HandleFunc("/{id}/zone/{zone}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       removeZone(w, r, dbPtr, colPtr)
-    }).Methods("DELETE")
+    })).Methods("DELETE")
 
 	defer session.Close()
   log.Fatal(http.ListenAndServe(":8053", r))
