@@ -124,9 +124,33 @@ services:
       - DBURL=mongodbSecondary:27017,mongodbPrimary:27017
       - DB=dnscfg
       - DBCOL=data
+      - JWT_ISSUER=auth
+      - JWT_SIGNATURE=secret
     ports:
       - target: 8053
         published: 8053
+        protocol: tcp
+    depends_on:
+    - mongodbPrimary
+    deploy:
+      replicas: 2
+
+  #
+  # Auth
+  #
+  auth:
+    image: g4bzh/auth:latest
+    networks:
+      - saas
+    environment:
+      - DBURL=mongodbSecondary:27017,mongodbPrimary:27017
+      - DB=auth
+      - DBCOL=data
+      - JWT_ISSUER=auth
+      - JWT_SIGNATURE=secret
+    ports:
+      - target: 8080
+        published: 8080
         protocol: tcp
     depends_on:
     - mongodbPrimary
