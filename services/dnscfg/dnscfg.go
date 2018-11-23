@@ -152,7 +152,7 @@ func main() {
     })).Methods("GET")
 
 	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
-			GetID(w, r, dbPtr, colPtr)
+			SetID(w, r, dbPtr, colPtr)
 		})).Methods("POST")
 
 	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +164,7 @@ func main() {
     })).Methods("GET")
 
 	r.HandleFunc("/v1/public/{id}/forwarders", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
-      GetForwarders(w, r, dbPtr, colPtr)
+      SetForwarders(w, r, dbPtr, colPtr)
     })).Methods("POST")
 
 	r.HandleFunc("/v1/public/{id}/zones", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
