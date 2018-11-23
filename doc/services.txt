@@ -12,7 +12,7 @@
    |                                                              \
    |                                            Bind + Custom Go Starter
    |                                                   +-----+      \
-   v             +-------------------------------->    | DNS |       \ Get
+   v             +-------------------------------->    | DNS |       \ Get/Set
                 /                                      +-----+        \ DNS Config
 Nginx + Consul Template                                                \
    +----+     /                                        +-----+          \
