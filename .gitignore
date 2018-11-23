@@ -5,3 +5,4 @@ services/ngx/simple.conf
 services/bnd/named.conf
 services/bnd/*.txt
 services/dnscfg/dnscfg
+services/auth/auth
