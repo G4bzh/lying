@@ -10,9 +10,6 @@ import (
   "github.com/gorilla/mux"
 )
 
-
-
-
 //
 // Globals
 //
@@ -21,13 +18,9 @@ var session *mgo.Session
 var signature []byte
 var issuer string
 
-
-
-
 //
 // Main
 //
-
 func main() {
 
 	var err error
