@@ -58,7 +58,7 @@ func main() {
 
 	// Routes
   r.HandleFunc("/v1/login", func(w http.ResponseWriter, r *http.Request) {
-      GetLogin(w, r, dbPtr, colPtr)
+      DoLogin(w, r, dbPtr, colPtr)
     }).Methods("POST")
 
 	r.HandleFunc("/v1/login", func(w http.ResponseWriter, r *http.Request) {
