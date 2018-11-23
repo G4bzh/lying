@@ -1,0 +1,7 @@
+FROM debian:stretch-slim
+
+COPY auth /usr/local/bin/auth
+
+EXPOSE 8080/tcp
+
+CMD ["/bin/bash", "-c","/usr/local/bin/auth -url $DBURL -db $DB -col $DBCOL"]
