@@ -125,7 +125,7 @@ func SetZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 		}
 		log.Printf("setZone %s for %s : Got %v", zone, id, u)
 
-		if (u.Domain != zone) {
+		if ( (u.Domain != zone) || (u.Domain == "") ) {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "{\"msg\":\"Bad or Empty domain name\"}")
 			log.Printf("setZone %s for %s : Mismatch domain %s", zone, id, u.Domain)
