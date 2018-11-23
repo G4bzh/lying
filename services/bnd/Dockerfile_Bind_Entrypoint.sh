@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Exit on error
 set -e
 
 cd /etc/bind
