@@ -25,6 +25,8 @@ service mongod start
 mongoimport -d dnscfg -c data --drop < /services/dnscfg/schema.json
 mongoimport -d auth -c data --drop < /services/auth/schema.json
 exit
+export JWT_ISSUER=auth
+export JWT_SIGNATURE=secret
 /usr/local/go/bin/go get -u github.com/globalsign/mgo
 /usr/local/go/bin/go get github.com/gorilla/mux
 /usr/local/go/bin/go get github.com/gorilla/context
