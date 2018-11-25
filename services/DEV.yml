@@ -1,0 +1,133 @@
+version: '3.7'
+
+
+services:
+
+  #
+  # Consul Cluster
+  #
+  consul:
+    image: consul
+    environment:
+      - CONSUL_CLIENT_INTERFACE=eth0
+      - CONSUL_BIND_INTERFACE=eth0
+    command: agent -server -bootstrap-expect=1
+    networks:
+      - saas
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  #
+  # Registrator on each node
+  #
+  registrator:
+    image: gliderlabs/registrator:latest
+    command: -internal consul://consul:8500
+    networks:
+      - saas
+    depends_on:
+      - consul
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /tmp/docker.sock
+
+
+  #
+  # Nginx loadbalancer
+  #
+  nginx:
+    image: g4bzh/ngx:latest
+    networks:
+      - saas
+    environment:
+      - CONSUL_TEMPLATE_LOG=debug
+    ports:
+      - target: 53
+        published: 53
+        protocol: tcp
+      - target: 53
+        published: 53
+        protocol: udp
+    depends_on:
+      - consul
+
+  #
+  # MongoDB Master
+  # mkdir /mongodb
+  #
+  mongodbPrimary:
+    image: bitnami/mongodb:latest
+    networks:
+      - saas
+      - front
+
+  #
+  # DNS Config
+  #
+  dnscfg:
+    image: g4bzh/dnscfg:latest
+    networks:
+      - saas
+      - front
+    environment:
+      - DBURL=mongodbPrimary:27017
+      - DB=dnscfg
+      - DBCOL=data
+      - JWT_ISSUER=auth
+      - JWT_SIGNATURE=secret
+    ports:
+      - target: 8053
+        published: 8053
+        protocol: tcp
+    depends_on:
+    - mongodbPrimary
+
+  #
+  # Auth
+  #
+  auth:
+    image: g4bzh/auth:latest
+    networks:
+      - front
+    environment:
+      - DBURL=mongodbPrimary:27017
+      - DB=auth
+      - DBCOL=data
+      - JWT_ISSUER=auth
+      - JWT_SIGNATURE=secret
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+    depends_on:
+    - mongodbPrimary
+
+#
+# Apigw
+#
+  apigw:
+    image: g4bzh/apigw:latest
+    networks:
+      - front
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+
+#
+# Networks
+#
+networks:
+  saas:
+    driver: overlay
+    ipam:
+      config:
+      - subnet: 242.0.0.0/8
+  front:
+    driver: overlay
+    ipam:
+      config:
+      - subnet: 246.0.0.0/8
