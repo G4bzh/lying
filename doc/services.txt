@@ -4,8 +4,8 @@
   \O/      Admin DNS          +-----------+        +--------+    Login       +------+  Auth DB   +----+----+
    |    --------------------> | Client UI |------> | API GW | <----------->  | Auth | -------->  | DB | DB |
   / \                         +-----------+        +--------+     JWT        +------+            +----+----+
- Client                          Vue.js             Traefik  \               | Auth |
-                                                or Ambassador \              +------+
+ Client                          Vue.js               Nginx  \               | Auth |
+                                                              \              +------+
    |                                                           \
    | DNS Request                                                \
    |                                                             \
