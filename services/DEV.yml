@@ -44,6 +44,9 @@ services:
       - saas
     environment:
       - CONSUL_TEMPLATE_LOG=debug
+    configs:
+      - source: nginx
+        target: /etc/nginx/conf.d/simple.ctmpl      
     ports:
       - target: 53
         published: 53
@@ -114,7 +117,7 @@ services:
       - front
     configs:
       - source: apigw
-        target: /etc/nginx/conf.d/simple.conf  
+        target: /etc/nginx/conf.d/simple.conf
     ports:
       - target: 80
         published: 80
@@ -138,3 +141,5 @@ networks:
 configs:
   apigw:
     file: apigw/simple.conf
+  nginx:
+    file: ngx/simple.ctmpl
