@@ -112,6 +112,9 @@ services:
     image: g4bzh/apigw:latest
     networks:
       - front
+    configs:
+      - source: apigw
+        target: /etc/nginx/conf.d/simple.conf  
     ports:
       - target: 80
         published: 80
@@ -131,3 +134,7 @@ networks:
     ipam:
       config:
       - subnet: 246.0.0.0/8
+
+configs:
+  apigw:
+    file: apigw/simple.conf
