@@ -147,39 +147,39 @@ func main() {
       GetConfigZone(w, r,  dbPtr, colPtr)
     }).Methods("GET")
 
-	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/id", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       GetID(w, r, dbPtr, colPtr)
     })).Methods("GET")
 
-	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/id", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
 			SetID(w, r, dbPtr, colPtr)
 		})).Methods("POST")
 
-	r.HandleFunc("/v1/public/{id}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/id", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
 			RemoveID(w, r, dbPtr, colPtr)
 		})).Methods("DELETE")
 
-	r.HandleFunc("/v1/public/{id}/forwarders", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/forwarders", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       GetForwarders(w, r, dbPtr, colPtr)
     })).Methods("GET")
 
-	r.HandleFunc("/v1/public/{id}/forwarders", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/forwarders", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       SetForwarders(w, r, dbPtr, colPtr)
     })).Methods("POST")
 
-	r.HandleFunc("/v1/public/{id}/zones", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/zones", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       GetZones(w, r,  dbPtr, colPtr)
     })).Methods("GET")
 
-	r.HandleFunc("/v1/public/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       GetZone(w, r, dbPtr, colPtr)
     })).Methods("GET")
 
-	r.HandleFunc("/v1/public/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       SetZone(w, r, dbPtr, colPtr)
     })).Methods("POST")
 
-	r.HandleFunc("/v1/public/{id}/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/public/zone/{zone}", middlewareAuth(func(w http.ResponseWriter, r *http.Request) {
       RemoveZone(w, r, dbPtr, colPtr)
     })).Methods("DELETE")
 

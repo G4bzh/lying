@@ -7,7 +7,6 @@ import (
 
 	"github.com/globalsign/mgo/bson"
   "github.com/gorilla/context"
-  "github.com/gorilla/mux"
 )
 
 
@@ -16,17 +15,9 @@ import (
 //
 func GetID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 	// Retrieve ID
-	id := mux.Vars(r)["id"]
+	id := context.Get(r, "clientID")
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	// Check ClientID from authMiddleware
-	if ( context.Get(r, "clientID") != id ) {
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-		log.Printf("getID : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-		return
-	}
 
 	// Get collection object
 	c := session.DB(*db).C(*col)
@@ -50,24 +41,16 @@ func GetID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 //
 func SetID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID & Zone
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("setID : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
-
-    // Get collection object
+		// Get collection object
     c := session.DB(*db).C(*col)
 
     // Create empty document
     var i Record
-		i.Id = id
+		i.Id = id.(string)
     if err := c.Insert(&i); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(w, "{\"msg\":\"Error inserting Id\"}")
@@ -84,17 +67,9 @@ func SetID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 //
 func RemoveID(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID & Zone
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("removeID : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
 
     // Get collection object
     c := session.DB(*db).C(*col)

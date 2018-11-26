@@ -18,17 +18,10 @@ import (
 //
 func GetZones(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("getZones : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -60,18 +53,10 @@ func GetZones(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 //
 func GetZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID & zone
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 		zone := mux.Vars(r)["zone"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("getZone : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -101,18 +86,10 @@ func GetZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 
 func SetZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID & zone
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 		zone := mux.Vars(r)["zone"]
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("setZone : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
 
 		b, _ := ioutil.ReadAll(r.Body)
 		var u Zone
@@ -160,18 +137,10 @@ func SetZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 
 func RemoveZone(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID & zone
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 		zone := mux.Vars(r)["zone"]
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("removeZone : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
 
     // Get collection object
     c := session.DB(*db).C(*col)

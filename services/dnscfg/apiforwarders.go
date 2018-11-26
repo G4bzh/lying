@@ -6,10 +6,9 @@ import (
   "log"
   "io/ioutil"
 	"encoding/json"
-  
+
 	"github.com/globalsign/mgo/bson"
   "github.com/gorilla/context"
-  "github.com/gorilla/mux"
 )
 
 
@@ -18,17 +17,9 @@ import (
 //
 func GetForwarders(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("getForwarders : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
 
     // Get collection object
     c := session.DB(*db).C(*col)
@@ -58,18 +49,9 @@ func GetForwarders(w http.ResponseWriter, r *http.Request, db *string, col *stri
 
 func SetForwarders(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     // Retrieve ID
-    id := mux.Vars(r)["id"]
+    id := context.Get(r, "clientID")
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		// Check ClientID from authMiddleware
-		if ( context.Get(r, "clientID") != id ) {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "{\"msg\":\"Not Allowed\"}")
-			log.Printf("setForwarders : ClientID Mismatch (%s != %s)", context.Get(r, "clientID"), id)
-			return
-		}
-
 
 		b, _ := ioutil.ReadAll(r.Body)
 		var f Record
