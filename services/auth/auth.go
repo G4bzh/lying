@@ -8,6 +8,7 @@ import (
 
   "github.com/globalsign/mgo"
   "github.com/gorilla/mux"
+	"github.com/gorilla/handlers"
 )
 
 //
@@ -51,10 +52,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("dnscfg : Connected to %s\n", *urlPtr)
+	log.Printf("auth : Connected to %s\n", *urlPtr)
 	// Read secondaries with consistence
 	session.SetMode(mgo.Monotonic, true)
 
+	// CORS handling
+	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+  allowedOrigins := handlers.AllowedOrigins([]string{"*"})
+  allowedMethods := handlers.AllowedMethods([]string{"POST", "PUT", "OPTIONS"})
 
 	// Routes
   r.HandleFunc("/v1/login", func(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +72,6 @@ func main() {
 
 
 	defer session.Close()
-  log.Fatal(http.ListenAndServe(":8080", r))
+  log.Fatal(http.ListenAndServe(":8080", handlers.CORS(allowedHeaders, allowedOrigins, allowedMethods)(r)))
 
 }

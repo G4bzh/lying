@@ -6,7 +6,7 @@ export default {
       <input type="text" placeholder="Enter Username" v-model="id" >
 
       <label><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" v-model="passwd" >
+      <input type="password" placeholder="Enter Password" v-model="password" >
 
       <button v-on:click="doLogin">Login</button>
 
@@ -18,12 +18,32 @@ export default {
     return {
       message: "",
       id: "",
-      passwd: ""
+      password: ""
     }
   },
   methods : {
     doLogin: function() {
-      this.message = this.id + "/" + this.passwd
+      self = this;
+      axios({
+        method: "post",
+        url: "http://auth.lyingto.me:9080/v1/login",
+        data: {
+          id: self.id,
+          password: self.password
+        }
+      }).then(function (response) {
+
+        self.message = response.data.token;
+
+      }).catch(function (error) {
+
+        if (error.response) {
+          self.message = error.response.data.msg;
+        } else {
+          self.message = "Unexpected Error";
+        }
+
+      });
     }
   }
 }
