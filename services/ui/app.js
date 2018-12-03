@@ -1,4 +1,7 @@
+Vue.use(VueMaterial.default)
+
 import login from './login.vue.js';
+
 
 var app = new Vue({
   el: '#app',

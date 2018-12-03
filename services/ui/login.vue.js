@@ -2,15 +2,26 @@ export default {
   name: "login",
   template: `
   <div>
-      <label><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" v-model="id" >
 
-      <label><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" v-model="password" >
+    <md-content class="md-elevation-3">
 
-      <button v-on:click="doLogin">Login</button>
+      <div class="md-title">Sign In </div>
 
-      {{ message }}
+      <md-field md-clearable>
+        <label>Username</label>
+        <md-input placeholder="Enter Username" v-model="id"></md-input>
+      </md-field>
+
+      <md-field>
+        <label>Password</label>
+        <md-input v-model="password" type="password" placeholder="Enter Password"></md-input>
+      </md-field>
+
+        <md-button class="md-raised md-primary" v-on:click="doLogin">Login</md-button>
+        {{ message }}
+
+    </md-content>
+
 
   </div>
   `,
