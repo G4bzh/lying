@@ -1,11 +1,11 @@
 export default {
-  name: "SignIn",
+  name: "SignUp",
   template: `
   <div>
     <div class="centered-container">
     <md-content class="md-elevation-3">
 
-      <div class="md-title">Sign In </div>
+      <div class="md-title">Sign Up </div>
 
       <md-field md-clearable>
         <label>Username</label>
@@ -17,7 +17,7 @@ export default {
         <md-input v-model="password" type="password" placeholder="Enter Password"></md-input>
       </md-field>
 
-        <md-button class="md-raised md-primary" v-on:click="doSignIn">Sign In</md-button>
+        <md-button class="md-raised md-primary" v-on:click="doSignUp">Sign Up</md-button>
         {{ message }}
 
     </md-content>
@@ -33,10 +33,10 @@ export default {
     }
   },
   methods : {
-    doSignIn: function() {
+    doSignUp: function() {
       self = this;
       axios({
-        method: "post",
+        method: "put",
         url: "http://auth.lyingto.me:9080/v1/login",
         data: {
           id: self.id,
