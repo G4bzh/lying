@@ -1,11 +1,11 @@
 Vue.use(VueMaterial.default)
 
-import login from './login.vue.js';
+import SignIn from './signin.vue.js';
 
 
 var app = new Vue({
   el: '#app',
   components : {
-    login
+    SignIn
   }
 });

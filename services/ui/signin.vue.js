@@ -1,5 +1,5 @@
 export default {
-  name: "login",
+  name: "SignIn",
   template: `
   <div>
 
@@ -17,7 +17,7 @@ export default {
         <md-input v-model="password" type="password" placeholder="Enter Password"></md-input>
       </md-field>
 
-        <md-button class="md-raised md-primary" v-on:click="doLogin">Login</md-button>
+        <md-button class="md-raised md-primary" v-on:click="doSignIn">Login</md-button>
         {{ message }}
 
     </md-content>
@@ -33,7 +33,7 @@ export default {
     }
   },
   methods : {
-    doLogin: function() {
+    doSignIn: function() {
       self = this;
       axios({
         method: "post",
