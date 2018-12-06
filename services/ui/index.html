@@ -8,8 +8,10 @@
     <link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/theme/default.css">
   <body>
     <div id="app">
-      <router-link to="/signin">sign-in</router-link>
-      <router-link to="/signup">sign-up</router-link>
+      <md-tabs md-sync-route md-alignment="right">
+        <md-tab id="tab-signin" md-icon="account_circle" md-label="Sign In" to="/signin"></md-tab>
+        <md-tab id="tab-signup" md-icon="account_box" md-label="Sign Up" to="/signup"></md-tab>
+      </md-tabs>
       <router-view></router-view>
     </div>
 

@@ -1,6 +1,10 @@
 Vue.use(VueMaterial.default)
 Vue.use(VueRouter);
 
+// Workaround to bypass "to=" error in md componement
+Vue.component('router-link', Vue.options.components.RouterLink);
+Vue.component('router-view', Vue.options.components.RouterView);
+
 import SignIn from './signin.vue.js';
 import SignUp from './signup.vue.js';
 
