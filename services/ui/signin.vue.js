@@ -2,7 +2,7 @@ export default {
   name: "SignIn",
   template: `
   <div>
-    <div class="centered-container">
+
     <md-content class="md-elevation-3">
 
       <div class="md-title">Sign In </div>
@@ -21,7 +21,7 @@ export default {
         {{ message }}
 
     </md-content>
-    </div>
+
 
   </div>
   `,
@@ -45,6 +45,7 @@ export default {
       }).then(function (response) {
 
         localStorage.setItem('user', JSON.stringify({id:self.id,token:response.data.token}));
+        self.$parent.isAuth = true;
 
         if (self.$route.query.redirect) {
           self.$router.push(self.$route.query.redirect);
@@ -60,6 +61,7 @@ export default {
           self.message = "Unexpected Error" + error;
         }
 
+        self.$parent.isAuth = false;
         localStorage.removeItem('user');
 
       });

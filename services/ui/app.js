@@ -7,6 +7,7 @@ Vue.component('router-view', Vue.options.components.RouterView);
 
 import SignIn from './signin.vue.js';
 import SignUp from './signup.vue.js';
+import SignOut from './signout.vue.js';
 import Dashboard from './dashboard.vue.js';
 
 const routes = [{
@@ -15,6 +16,9 @@ const routes = [{
 }, {
   path: '/signup',
   component: SignUp
+}, {
+  path: '/signout',
+  component: SignOut  
 }, {
   path: '/dashboard',
   component: Dashboard,
@@ -49,5 +53,8 @@ var app = new Vue({
     Dashboard,
     SignIn,
     SignUp
+  },
+  data : {
+    isAuth : false
   }
 });
