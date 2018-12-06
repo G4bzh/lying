@@ -7,7 +7,7 @@ Vue.component('router-view', Vue.options.components.RouterView);
 
 import SignIn from './signin.vue.js';
 import SignUp from './signup.vue.js';
-
+import Dashboard from './dashboard.vue.js';
 
 const routes = [{
   path: '/signin',
@@ -15,6 +15,9 @@ const routes = [{
 }, {
   path: '/signup',
   component: SignUp
+}, {
+  path: '/dashboard',
+  component: Dashboard
 }];
 
 const router = new VueRouter({
@@ -25,6 +28,7 @@ var app = new Vue({
   router,
   el: '#app',
   components : {
+    Dashboard,
     SignIn,
     SignUp
   }
