@@ -44,15 +44,23 @@ export default {
         }
       }).then(function (response) {
 
-        self.message = response.data.token;
+        localStorage.setItem('user', JSON.stringify({id:self.id,token:response.data.token}));
+
+        if (self.$route.query.redirect) {
+          self.$router.push(self.$route.query.redirect);
+        } else {
+          self.$router.push("/");
+        }
 
       }).catch(function (error) {
 
         if (error.response) {
           self.message = error.response.data.msg;
         } else {
-          self.message = "Unexpected Error";
+          self.message = "Unexpected Error" + error;
         }
+
+        localStorage.removeItem('user');
 
       });
     }

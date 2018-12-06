@@ -17,12 +17,30 @@ const routes = [{
   component: SignUp
 }, {
   path: '/dashboard',
-  component: Dashboard
+  component: Dashboard,
+  meta: {
+    requiresAuth: true
+  }
 }];
 
 const router = new VueRouter({
     routes // short for `routes: routes`
 })
+
+// Auth guard
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  if (requiresAuth && !user) {
+     next({
+       path: '/signin',
+       query: { redirect: to.fullPath }
+     });
+  } else {
+    next();
+  }
+});
 
 var app = new Vue({
   router,
