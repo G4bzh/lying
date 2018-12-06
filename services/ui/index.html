@@ -8,11 +8,13 @@
     <link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/theme/default.css">
   <body>
     <div id="app">
-      <sign-in></sign-in>
-      <sign-up></sign-up>
+      <router-link to="/signin">sign-in</router-link>
+      <router-link to="/signup">sign-up</router-link>
+      <router-view></router-view>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/vue-material@beta"></script>
     <script type="module" src="app.js" ></script>
