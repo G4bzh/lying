@@ -15,7 +15,9 @@
           <md-tab id="tab-signin" md-icon="account_circle" md-label="Sign In" to="/signin"></md-tab>
           <md-tab id="tab-signup" md-icon="account_box" md-label="Sign Up" to="/signup"></md-tab>
         </div>
-        <md-tab id="tab-signout" md-icon="exit_to_app" md-label="Sign Out" to="/signout" v-if="isAuth"></md-tab>
+        <span v-else>
+          <md-tab id="tab-signout" md-icon="exit_to_app" md-label="Sign Out" to="/signout"></md-tab>
+        </span>
       </md-tabs>
 
       <router-view></router-view>
