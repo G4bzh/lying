@@ -14,7 +14,7 @@ export default {
 
       <md-field md-clearable v-show=isSignUp>
         <label>Username</label>
-        <md-input placeholder="Enter an Username" v-model="id"></md-input>
+        <md-input placeholder="Enter an Username" v-model="username"></md-input>
       </md-field>
 
       <md-field>
@@ -36,6 +36,7 @@ export default {
       message: "",
       id: "",
       password: "",
+      username: "",
       isSignUp : false
     }
   },
@@ -48,7 +49,28 @@ export default {
     doSign: function() {
       self = this;
       if (self.isSignUp) {
+        axios({
+          method: "put",
+          url: "http://auth.lyingto.me:9080/v1/login",
+          data: {
+            id: self.id,
+            password: self.password,
+            username: self.username
+          }
+        }).then(function (response) {
 
+          self.$router.push("/");
+
+
+        }).catch(function (error) {
+
+          if (error.response) {
+            self.message = error.response.data.msg;
+          } else {
+            self.message = "Unexpected Error";
+          }
+
+        });
       } else {
 
         axios({
@@ -61,7 +83,6 @@ export default {
         }).then(function (response) {
 
           localStorage.setItem('user', JSON.stringify({id:self.id,token:response.data.token,name:response.data.username}));
-          self.$parent.isAuth = true;
 
           if (self.$route.query.redirect) {
             self.$router.push(self.$route.query.redirect);
@@ -77,7 +98,6 @@ export default {
             self.message = "Unexpected Error" + error;
           }
 
-          self.$parent.isAuth = false;
           localStorage.removeItem('user');
 
         });

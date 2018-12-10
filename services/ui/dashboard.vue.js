@@ -6,15 +6,24 @@ export default {
 
       <div class="md-title">Dashboard </div>
 
-      Hello {{ client }}
+      Hello {{ username }}
 
     </md-content>
 
   </div>
   `,
   data: function() {
-    return {
-      client: ""
+    return {}
+  },
+  computed: {
+    username: function () {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        if (user.name) {
+          return user.name;
+        }
+      }
+      return "Unknown";
     }
   }
 };

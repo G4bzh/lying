@@ -90,7 +90,7 @@ func DoLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 
 
 //
-// Logup
+// Signup
 //
 func SetLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) {
 

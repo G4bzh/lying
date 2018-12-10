@@ -12,7 +12,6 @@ export default {
   `,
   methods : {
     doSignOut: function() {
-      this.$parent.isAuth = false;
       localStorage.removeItem('user');
       this.$router.push("/");
     }

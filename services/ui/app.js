@@ -6,7 +6,6 @@ Vue.component('router-link', Vue.options.components.RouterLink);
 Vue.component('router-view', Vue.options.components.RouterView);
 
 import SignIn from './signin.vue.js';
-import SignUp from './signup.vue.js';
 import SignOut from './signout.vue.js';
 import Dashboard from './dashboard.vue.js';
 
@@ -14,11 +13,8 @@ const routes = [{
   path: '/signin',
   component: SignIn
 }, {
-  path: '/signup',
-  component: SignUp
-}, {
   path: '/signout',
-  component: SignOut  
+  component: SignOut
 }, {
   path: '/dashboard',
   component: Dashboard,
@@ -35,8 +31,15 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const user = JSON.parse(localStorage.getItem('user'));
+  var token = null;
 
-  if (requiresAuth && !user) {
+  if (user) {
+    if (user.token) {
+      token=user.token;
+    }
+  }
+
+  if (requiresAuth && !token) {
      next({
        path: '/signin',
        query: { redirect: to.fullPath }
@@ -44,6 +47,7 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
+  
 });
 
 var app = new Vue({
@@ -51,10 +55,19 @@ var app = new Vue({
   el: '#app',
   components : {
     Dashboard,
-    SignIn,
-    SignUp
+    SignIn
   },
   data : {
-    isAuth : false
+  },
+  methods : {
+    isAuth : function() {
+      var user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        if (user.token) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 });
