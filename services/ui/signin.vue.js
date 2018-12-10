@@ -5,11 +5,16 @@ export default {
 
     <md-content class="md-elevation-3">
 
-      <div class="md-title">Sign In </div>
+      <div class="md-title">{{ title }}</div>
 
       <md-field md-clearable>
+        <label>Mail Address</label>
+        <md-input placeholder="Enter Email Address" v-model="id"></md-input>
+      </md-field>
+
+      <md-field md-clearable v-show=isSignUp>
         <label>Username</label>
-        <md-input placeholder="Enter Username" v-model="id"></md-input>
+        <md-input placeholder="Enter an Username" v-model="id"></md-input>
       </md-field>
 
       <md-field>
@@ -17,7 +22,8 @@ export default {
         <md-input v-model="password" type="password" placeholder="Enter Password"></md-input>
       </md-field>
 
-        <md-button class="md-raised md-primary" v-on:click="doSignIn">Sign In</md-button>
+      <md-checkbox v-model="isSignUp">I want to Sign Up</md-checkbox>
+      <md-button class="md-raised md-primary" v-on:click="doSign">{{ title }}</md-button>
         {{ message }}
 
     </md-content>
@@ -29,42 +35,53 @@ export default {
     return {
       message: "",
       id: "",
-      password: ""
+      password: "",
+      isSignUp : false
+    }
+  },
+  computed: {
+    title: function() {
+      return (this.isSignUp ? "Sign Up" : "Sign In");
     }
   },
   methods : {
-    doSignIn: function() {
+    doSign: function() {
       self = this;
-      axios({
-        method: "post",
-        url: "http://auth.lyingto.me:9080/v1/login",
-        data: {
-          id: self.id,
-          password: self.password
-        }
-      }).then(function (response) {
+      if (self.isSignUp) {
 
-        localStorage.setItem('user', JSON.stringify({id:self.id,token:response.data.token}));
-        self.$parent.isAuth = true;
+      } else {
 
-        if (self.$route.query.redirect) {
-          self.$router.push(self.$route.query.redirect);
-        } else {
-          self.$router.push("/");
-        }
+        axios({
+          method: "post",
+          url: "http://auth.lyingto.me:9080/v1/login",
+          data: {
+            id: self.id,
+            password: self.password
+          }
+        }).then(function (response) {
 
-      }).catch(function (error) {
+          localStorage.setItem('user', JSON.stringify({id:self.id,token:response.data.token,name:response.data.username}));
+          self.$parent.isAuth = true;
 
-        if (error.response) {
-          self.message = error.response.data.msg;
-        } else {
-          self.message = "Unexpected Error" + error;
-        }
+          if (self.$route.query.redirect) {
+            self.$router.push(self.$route.query.redirect);
+          } else {
+            self.$router.push("/");
+          }
 
-        self.$parent.isAuth = false;
-        localStorage.removeItem('user');
+        }).catch(function (error) {
 
-      });
+          if (error.response) {
+            self.message = error.response.data.msg;
+          } else {
+            self.message = "Unexpected Error" + error;
+          }
+
+          self.$parent.isAuth = false;
+          localStorage.removeItem('user');
+
+        });
+      }
     }
   }
 }
