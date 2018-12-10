@@ -1,15 +1,18 @@
 {
         "_id": "foo@bar.com",
+        "name": "foo",
         "hash": "18778f56ded2a272d9a371d34d615eb57d3a095caf76cef8cf92a50f544b3f31",
         "salt": "f902e683bccfba5ddaa498a355f6327013f36d14a938e07aa2fb6d5486fdf31b"
 }
 {
         "_id": "john@doe.com",
+        "name": "john",
         "hash": "afae7ba5f01b6bc5abf2e58d98e310e8318bd6460916ac506394aaa95f89787d",
         "salt": "4630f34267295a5ecb1f20ca42990e5abf3ca4d9f0641baf5aeb22649841adce"
 }
 {
         "_id": "bar@foo.com",
+        "name": "bar",
         "hash": "5087ed9c7e1e7ad8735b66b6b48b570441716a078f70f4dedc174c2cc0764fde",
         "salt": "07f9b8f4638d90a509bc9c1ddba978bc4f4237f65d2d714b75753e4ade174b42"
 }

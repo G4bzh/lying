@@ -84,7 +84,7 @@ func DoLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     return
   }
   log.Printf("doLogin :Token %s", tokenString)
-	fmt.Fprintf(w, "{\"token\":\"%s\"}", tokenString)
+	fmt.Fprintf(w, "{\"token\":\"%s\", \"username\":\"%s\"}", tokenString, uout.Name)
 
 }
 
@@ -108,6 +108,13 @@ func SetLogin(w http.ResponseWriter, r *http.Request, db *string, col *string) {
     return
   }
   log.Printf("setLogin : Got %v", u)
+
+	if ( u.Id=="" || u.Name=="" || u.Hash=="" ) {
+		w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintf(w, "{\"msg\":\"empty fields\"}")
+    log.Printf("setLogin : empty fields %v", u)
+    return
+	}
 
   // Get collection object
   c := session.DB(*db).C(*col)
