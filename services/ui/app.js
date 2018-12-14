@@ -74,10 +74,6 @@ router.beforeEach((to, from, next) => {
 var app = new Vue({
   router,
   el: '#app',
-  components : {
-    MyLies,
-    SignIn
-  },
   data : {
   },
   methods : {

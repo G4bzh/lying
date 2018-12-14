@@ -12,17 +12,17 @@ export default {
 
         <md-list>
 
-          <md-list-item to="mydashboard">
+          <md-list-item to="/mylies/mydashboard">
             <md-icon>dashboard</md-icon>
             <span class="md-list-item-text">Dashboard</span>
           </md-list-item>
 
-          <md-list-item to="mydns">
+          <md-list-item to="/mylies/mydns">
             <md-icon>dns</md-icon>
             <span class="md-list-item-text">DNS Configuration</span>
           </md-list-item>
 
-          <md-list-item to="mysettings">
+          <md-list-item to="/mylies/mysettings">
             <md-icon>settings</md-icon>
             <span class="md-list-item-text">Settings</span>
           </md-list-item>
