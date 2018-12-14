@@ -7,7 +7,7 @@ Vue.component('router-view', Vue.options.components.RouterView);
 
 import SignIn from './signin.vue.js';
 import SignOut from './signout.vue.js';
-import Dashboard from './dashboard.vue.js';
+import MyLies from './mylies.vue.js';
 
 const routes = [{
   path: '/signin',
@@ -16,8 +16,8 @@ const routes = [{
   path: '/signout',
   component: SignOut
 }, {
-  path: '/dashboard',
-  component: Dashboard,
+  path: '/mylies',
+  component: MyLies,
   meta: {
     requiresAuth: true
   }
@@ -47,14 +47,14 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
-  
+
 });
 
 var app = new Vue({
   router,
   el: '#app',
   components : {
-    Dashboard,
+    MyLies,
     SignIn
   },
   data : {
