@@ -8,6 +8,9 @@ Vue.component('router-view', Vue.options.components.RouterView);
 import SignIn from './signin.vue.js';
 import SignOut from './signout.vue.js';
 import MyLies from './mylies.vue.js';
+import MyDashboard from './mydashboard.vue.js'
+import MyDns from './mydns.vue.js'
+import MySettings from './mysettings.vue.js'
 
 const routes = [{
   path: '/signin',
@@ -20,7 +23,25 @@ const routes = [{
   component: MyLies,
   meta: {
     requiresAuth: true
-  }
+  },
+  children: [
+    {
+      path: '',
+      component: MyDashboard
+    },
+    {
+      path: 'mydashboard',
+      component: MyDashboard
+    },
+    {
+      path: 'mydns',
+      component: MyDns
+    },
+    {
+      path: 'mysettings',
+      component: MySettings
+    }
+  ]
 }];
 
 const router = new VueRouter({
