@@ -14,7 +14,7 @@ export default {
 
       <md-field md-clearable v-show=isSignUp>
         <label>Username</label>
-        <md-input placeholder="Enter an Username" v-model="username"></md-input>
+        <md-input placeholder="Enter Username" v-model="username"></md-input>
       </md-field>
 
       <md-field>
