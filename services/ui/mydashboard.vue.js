@@ -5,7 +5,7 @@ export default {
     <md-card md-with-hover>
 
         <md-card-header>
-          <div class="md-title">Hello</div>
+          <div class="md-title">Welcome</div>
         </md-card-header>
 
         <md-card-content>
@@ -14,52 +14,24 @@ export default {
 
     </md-card>
 
-    <md-card md-with-hover>
-
+    <md-card md-with-hover @click.native="$router.push('/mylies/mydns')">
+      <md-ripple >
         <md-card-header>
           <div class="md-title">Your Zones</div>
         </md-card-header>
 
         <md-card-content>
-          {{ domains }}
+          {{ n }}
         </md-card-content>
 
-        <md-card-expand>
-
-          <md-card-actions md-alignment="space-between">
-            <md-card-expand-trigger>
-              <md-button class="md-icon-button">
-                <md-icon>keyboard_arrow_down</md-icon>
-              </md-button>
-            </md-card-expand-trigger>
-          </md-card-actions>
-
-          <md-card-expand-content>
-            <md-card-content>
-              {{ token }}
-            </md-card-content>
-          </md-card-expand-content>
-        </md-card-expand>
-
-    </md-card>
-
-    <md-card md-with-hover>
-
-        <md-card-header>
-          <div class="md-title">Requests</div>
-        </md-card-header>
-
-        <md-card-content>
-          1234567
-        </md-card-content>
-
+      </md-ripple>
     </md-card>
 
   </div>
   `,
   data: function() {
     return {
-      n_domains : 2
+      n: 0
     }
   },
   computed: {
@@ -80,28 +52,27 @@ export default {
         }
       }
       return "Unknown";
-    },
-    domains: function() {
-      self = this;
+  }},
+  mounted: function () {
+    self = this;
 
-      axios({
-        method: "get",
-        headers: {'Authorization' : 'Bearer ' + self.token },
-        url: "http://dnscfg.lyingto.me:9053/v1/public/zones"
-      }).then(function (response) {
+    axios({
+      method: "get",
+      headers: {'Authorization' : 'Bearer ' + self.token },
+      url: "http://dnscfg.lyingto.me:9053/v1/public/zones"
+    }).then(function (response) {
 
-        return response.data.domain[0];
+      self.n = response.data.length;
 
 
-      }).catch(function (error) {
+    }).catch(function (error) {
 
-        if (error.response) {
-          return error.response.data.msg;
-        } else {
-          return "Unexpected Error" + error;
-        }
+      if (error.response) {
+        return error.response.data.msg;
+      } else {
+        return "Unexpected Error" + error;
+      }
 
-      });
-    }
+    });
   }
 };
