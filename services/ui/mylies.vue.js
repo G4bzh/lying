@@ -1,10 +1,5 @@
-import MyDashboard from './mydashboard.vue.js'
-
 export default {
   name: "MyLies",
-  components : {
-    MyDashboard
-  },
   template: `
   <div>
     <md-app>
