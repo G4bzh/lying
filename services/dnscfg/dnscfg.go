@@ -11,6 +11,7 @@ import (
 	"github.com/globalsign/mgo"
   "github.com/gorilla/mux"
 	"github.com/gorilla/context"
+	"github.com/gorilla/handlers"
 	jwt "github.com/dgrijalva/jwt-go"
 
 )
@@ -133,7 +134,10 @@ func main() {
 	// Read secondaries with consistence
 	session.SetMode(mgo.Monotonic, true)
 
-
+	// CORS handling
+	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+  allowedOrigins := handlers.AllowedOrigins([]string{"*"})
+  allowedMethods := handlers.AllowedMethods([]string{"POST", "GET", "DELETE", "OPTIONS"})
 
   r.HandleFunc("/v1/private/{id}/config/zones", func(w http.ResponseWriter, r *http.Request) {
       GetConfigZones(w, r, dbPtr, colPtr)
@@ -184,6 +188,6 @@ func main() {
     })).Methods("DELETE")
 
 	defer session.Close()
-  log.Fatal(http.ListenAndServe(":8053", r))
+  log.Fatal(http.ListenAndServe(":8053",handlers.CORS(allowedHeaders, allowedOrigins, allowedMethods)(r)))
 
 }
