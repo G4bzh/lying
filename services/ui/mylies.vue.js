@@ -17,7 +17,7 @@ export default {
             <span class="md-list-item-text">Dashboard</span>
           </md-list-item>
 
-          <md-list-item to="/mylies/mydns" md-expand>
+          <md-list-item md-expand>
             <md-icon>dns</md-icon>
             <span class="md-list-item-text">DNS Configuration</span>
             <md-list slot="md-expand">
