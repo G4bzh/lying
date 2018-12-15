@@ -10,6 +10,8 @@ import SignOut from './signout.vue.js';
 import MyLies from './mylies.vue.js';
 import MyDashboard from './mydashboard.vue.js'
 import MyDns from './mydns.vue.js'
+import MyDnsConfig from './mydnsconfig.vue.js'
+import MyDnsZone from './mydnszone.vue.js'
 import MySettings from './mysettings.vue.js'
 
 const routes = [{
@@ -34,8 +36,22 @@ const routes = [{
       component: MyDashboard
     },
     {
-      path: 'mydns',
-      component: MyDns
+      path: 'mydns/',
+      component: MyDns,
+      children: [
+        {
+          path : '',
+          component: MyDnsConfig
+        },
+        {
+          path: 'config',
+          component: MyDnsConfig
+        },
+        {
+          path: 'zone/:zone',
+          component: MyDnsZone
+        }
+      ]
     },
     {
       path: 'mysettings',

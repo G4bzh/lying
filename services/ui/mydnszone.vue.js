@@ -1,8 +1,10 @@
 export default {
-  name: "MyDns",
+  name: "MyDnsZone",
   template: `
   <div>
-    <RouterView></RouterView>
+
+      Zone {{ $route.params.zone }}
+
   </div>
   `,
   data: function() {

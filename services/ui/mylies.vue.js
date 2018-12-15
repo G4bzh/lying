@@ -17,9 +17,13 @@ export default {
             <span class="md-list-item-text">Dashboard</span>
           </md-list-item>
 
-          <md-list-item to="/mylies/mydns">
+          <md-list-item to="/mylies/mydns" md-expand>
             <md-icon>dns</md-icon>
             <span class="md-list-item-text">DNS Configuration</span>
+            <md-list slot="md-expand">
+              <md-list-item class="md-inset" to="/mylies/mydns/config">Genral Configuration</md-list-item>
+              <md-list-item class="md-inset" v-for="zone in zones" :key="zone.domain" :to="'/mylies/mydns/zone/' + zone.domain">{{zone.domain}}</md-list-item>
+            </md-list>
           </md-list-item>
 
           <md-list-item to="/mylies/mysettings">
@@ -42,6 +46,41 @@ export default {
   </div>
   `,
   data: function() {
-    return {}
+    return {
+      zones: []
+    }
+  },
+  computed: {
+    token: function () {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        if (user.token) {
+          return user.token;
+        }
+      }
+      return "Unknown";
+    }
+  },
+  mounted: function () {
+    self = this;
+
+    axios({
+      method: "get",
+      headers: {'Authorization' : 'Bearer ' + self.token },
+      url: "http://dnscfg.lyingto.me:9053/v1/public/zones"
+    }).then(function (response) {
+
+        self.zones = response.data;
+
+
+    }).catch(function (error) {
+
+      if (error.response) {
+        return error.response.data.msg;
+      } else {
+        return "Unexpected Error" + error;
+      }
+
+    });
   }
 };

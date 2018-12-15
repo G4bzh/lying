@@ -1,8 +1,8 @@
 export default {
-  name: "MyDns",
+  name: "MyDnsConfig",
   template: `
   <div>
-    <RouterView></RouterView>
+    DNS Config
   </div>
   `,
   data: function() {

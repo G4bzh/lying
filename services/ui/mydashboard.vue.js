@@ -2,8 +2,8 @@ export default {
   name: "MyDashboard",
   template: `
   <div>
-    <md-card md-with-hover>
-
+    <md-card md-with-hover @click.native="$router.push('/mylies/mysettings')">
+      <md-ripple>
         <md-card-header>
           <div class="md-title">Welcome</div>
         </md-card-header>
@@ -11,11 +11,11 @@ export default {
         <md-card-content>
           {{username}}
         </md-card-content>
-
+      </md-ripple>
     </md-card>
 
     <md-card md-with-hover @click.native="$router.push('/mylies/mydns')">
-      <md-ripple >
+      <md-ripple>
         <md-card-header>
           <div class="md-title">Your Zones</div>
         </md-card-header>
