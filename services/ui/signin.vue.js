@@ -47,27 +47,27 @@ export default {
   },
   methods : {
     doSign: function() {
-      self = this;
-      if (self.isSignUp) {
+
+      if (this.isSignUp) {
         axios({
           method: "put",
           url: "http://auth.lyingto.me:9080/v1/login",
           data: {
-            id: self.id,
-            password: self.password,
-            username: self.username
+            id: this.id,
+            password: this.password,
+            username: this.username
           }
-        }).then(function (response) {
+        }).then(response => {
 
-          self.$router.push("/");
+          this.$router.push("/");
 
 
-        }).catch(function (error) {
+        }).catch(error => {
 
           if (error.response) {
-            self.message = error.response.data.msg;
+            this.message = error.response.data.msg;
           } else {
-            self.message = "Unexpected Error";
+            this.message = "Unexpected Error";
           }
 
         });
@@ -77,25 +77,25 @@ export default {
           method: "post",
           url: "http://auth.lyingto.me:9080/v1/login",
           data: {
-            id: self.id,
-            password: self.password
+            id: this.id,
+            password: this.password
           }
-        }).then(function (response) {
+        }).then(response => {
 
-          localStorage.setItem('user', JSON.stringify({id:self.id,token:response.data.token,name:response.data.username}));
+          localStorage.setItem('user', JSON.stringify({id:this.id,token:response.data.token,name:response.data.username}));
 
-          if (self.$route.query.redirect) {
-            self.$router.push(self.$route.query.redirect);
+          if (this.$route.query.redirect) {
+            this.$router.push(this.$route.query.redirect);
           } else {
-            self.$router.push("/");
+            this.$router.push("/");
           }
 
-        }).catch(function (error) {
+        }).catch(error => {
 
           if (error.response) {
-            self.message = error.response.data.msg;
+            this.message = error.response.data.msg;
           } else {
-            self.message = "Unexpected Error" + error;
+            this.message = "Unexpected Error" + error;
           }
 
           localStorage.removeItem('user');

@@ -54,15 +54,14 @@ export default {
       return "Unknown";
   }},
   mounted: function () {
-    self = this;
 
     axios({
       method: "get",
-      headers: {'Authorization' : 'Bearer ' + self.token },
+      headers: {'Authorization' : 'Bearer ' + this.token },
       url: "http://dnscfg.lyingto.me:9053/v1/public/zones"
-    }).then(function (response) {
+    }).then(response => {
 
-      self.n = response.data.length;
+      this.n = response.data.length;
 
 
     }).catch(function (error) {
