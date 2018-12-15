@@ -71,7 +71,7 @@ export default {
 
         this.zones = response.data;
 
-    }).catch(function (error) {
+    }).catch(error => {
 
       if (error.response) {
         return error.response.data.msg;

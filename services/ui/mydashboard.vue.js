@@ -64,7 +64,7 @@ export default {
       this.n = response.data.length;
 
 
-    }).catch(function (error) {
+    }).catch(error => {
 
       if (error.response) {
         return error.response.data.msg;

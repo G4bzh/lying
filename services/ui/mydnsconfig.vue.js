@@ -38,7 +38,7 @@ export default {
         this.forwarders = response.data;
 
 
-    }).catch(function (error) {
+    }).catch(error => {
 
       if (error.response) {
         return error.response.data.msg;
