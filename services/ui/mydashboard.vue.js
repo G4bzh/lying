@@ -1,8 +1,9 @@
 export default {
   name: "MyDashboard",
   template: `
-  <div>
-    <md-card md-with-hover @click.native="$router.push('/mylies/mysettings')">
+  <div class="md-layout md-gutter md-size-50 md-small-size-100">
+
+    <md-card class="md-layout-item" md-with-hover @click.native="$router.push('/mylies/mysettings')">
       <md-ripple>
         <md-card-header>
           <div class="md-title">Welcome</div>
@@ -14,7 +15,7 @@ export default {
       </md-ripple>
     </md-card>
 
-    <md-card md-with-hover @click.native="$router.push('/mylies/mydns')">
+    <md-card class="md-layout-item" md-with-hover @click.native="$router.push('/mylies/mydns')">
       <md-ripple>
         <md-card-header>
           <div class="md-title">Your Zones</div>
