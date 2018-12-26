@@ -5,6 +5,7 @@ Vue.use(VueRouter);
 Vue.component('router-link', Vue.options.components.RouterLink);
 Vue.component('router-view', Vue.options.components.RouterView);
 
+import * as URL from "./url.js"
 import SignIn from './signin.vue.js';
 import SignOut from './signout.vue.js';
 import MyLies from './mylies.vue.js';

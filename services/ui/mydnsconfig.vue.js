@@ -1,3 +1,5 @@
+import * as URL from "./url.js"
+
 export default {
   name: "MyDnsConfig",
   template: `
@@ -53,7 +55,7 @@ export default {
     axios({
       method: "get",
       headers: {'Authorization' : 'Bearer ' + this.token },
-      url: "http://dnscfg.lyingto.me:9053//v1/public/forwarders"
+      url: URL.GETFORWARDERS
     }).then(response => {
 
         this.forwarders = response.data;
@@ -71,7 +73,7 @@ export default {
 
     axios({
       method: "get",
-      url: "https://api.ipify.org/?format=json"
+      url: URL.GETPUBLICIP
     }).then(response => {
 
         this.ip = response.data.ip;

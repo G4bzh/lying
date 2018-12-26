@@ -1,3 +1,5 @@
+import * as URL from "./url.js"
+
 export default {
   name: "MyDnsZone",
   template: `
@@ -32,7 +34,7 @@ export default {
     axios({
       method: "get",
       headers: {'Authorization' : 'Bearer ' + this.token },
-      url: "http://dnscfg.lyingto.me:9053//v1/public/zone/" +  this.$route.params.zone
+      url: URL.GETZONE +  this.$route.params.zone
     }).then(response => {
 
       this.rrs = response.data.rrs;

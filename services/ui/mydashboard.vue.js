@@ -1,3 +1,5 @@
+import * as URL from "./url.js"
+
 export default {
   name: "MyDashboard",
   template: `
@@ -59,7 +61,7 @@ export default {
     axios({
       method: "get",
       headers: {'Authorization' : 'Bearer ' + this.token },
-      url: "http://dnscfg.lyingto.me:9053/v1/public/zones"
+      url: URL.GETZONES
     }).then(response => {
 
       this.n = response.data.length;

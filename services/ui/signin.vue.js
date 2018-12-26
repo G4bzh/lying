@@ -1,3 +1,5 @@
+import * as URL from "./url.js"
+
 export default {
   name: "SignIn",
   template: `
@@ -51,7 +53,7 @@ export default {
       if (this.isSignUp) {
         axios({
           method: "put",
-          url: "http://auth.lyingto.me:9080/v1/login",
+          url: URL.SIGNIN,
           data: {
             id: this.id,
             password: this.password,
