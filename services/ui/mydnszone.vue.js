@@ -1,10 +1,12 @@
 import * as URL from "./url.js"
+import ZoneEdit from "./zonedit.vue.js"
 
 export default {
   name: "MyDnsZone",
   template: `
   <div>
 
+      <zone-edit rrname="toto" v-bind:rrttl=4></zone-edit>
       Zone {{ $route.params.zone }}
       <ul>
         <li v-for="rr in rrs">
@@ -17,6 +19,9 @@ export default {
     return {
       rrs : []
     }
+  },
+  components: {
+    ZoneEdit
   },
   computed: {
     token: function () {
