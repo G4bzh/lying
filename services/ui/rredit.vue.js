@@ -1,12 +1,12 @@
 export default {
-  name: "ZoneEdit",
+  name: "RrEdit",
   template: `
     <div>
-      Hello {{ rrname }}
-      TTL is {{ rrttl }}
+      <li>{{ rrindex }}- {{ rrname }} {{ rrttl }} {{ rrclass }} {{ rrtype }} {{ rrdata }}</li>
     </div>
   `,
   props: {
+    rrindex: Number,
     rrname: String,
     rrttl: Number,
     rrclass: String,

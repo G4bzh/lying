@@ -1,18 +1,23 @@
 import * as URL from "./url.js"
-import ZoneEdit from "./zonedit.vue.js"
+import RrEdit from "./rredit.vue.js"
 
 export default {
   name: "MyDnsZone",
   template: `
   <div>
 
-      <zone-edit rrname="toto" v-bind:rrttl=4></zone-edit>
       Zone {{ $route.params.zone }}
-      <ul>
-        <li v-for="rr in rrs">
-          {{ rr.name }} {{ rr.ttl }} {{ rr.class }} {{ rr.type }} {{ rr.rdata }}
-        </li>
-      </ul>
+      <div v-for="rr,index in rrs">
+          <rr-edit
+            v-bind:rrname=rr.name
+            v-bind:rrttl=rr.ttl
+            v-bind:rrclass=rr.class
+            v-bind:rrtype=rr.type
+            v-bind:rrdata=rr.rdata
+            v-bind:rrindex=index>
+          </rr-edit>
+      </div>
+      
   </div>
   `,
   data: function() {
@@ -21,7 +26,7 @@ export default {
     }
   },
   components: {
-    ZoneEdit
+    RrEdit
   },
   computed: {
     token: function () {
