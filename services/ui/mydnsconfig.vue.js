@@ -12,7 +12,7 @@ export default {
       </md-card-header>
 
       <md-card-content>
-        <md-chips v-model="forwarders" md-placeholder="Add forwarder..."></md-chips>
+        <md-chips v-model="forwarders" md-placeholder="Add forwarder..." ></md-chips>
       </md-card-content>
 
     </md-card>
@@ -92,17 +92,7 @@ export default {
   },
   methods: {
     rmIP: function (event) {
-
-      var i;
-      for(i=0;i<event.path.length;i++) {
-        if (String(event.path[i].className).includes("md-chip")) {
-          break;
-        }
-      }
-
-      if (i<event.path.length) {
-        this.ips =  this.ips.filter(function(e) { return event.path[i].textContent.trim() != e.trim() })
-      }
+        this.ips =  this.ips.filter(function(e) { return event.currentTarget.parentElement.textContent.trim() != e.trim() })
     },
     addIP: function () {
 

@@ -64,7 +64,7 @@ export default {
     }
   },
   mounted: function () {
-    console.log(URL.GETZONES);
+    
     axios({
       method: "get",
       headers: {'Authorization' : 'Bearer ' + this.token },
