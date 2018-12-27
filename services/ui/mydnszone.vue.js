@@ -17,7 +17,8 @@ export default {
             v-bind:rrindex=index>
           </rr-edit>
       </div>
-      
+      <rr-edit></rr-edit>
+
   </div>
   `,
   data: function() {
