@@ -74,8 +74,9 @@ export default {
       console.log("Adding Object");
       return;
     },
-    doRemove: function(i) {
-      console.log("Removing Object at index " + i);
+    doRemove: function(ind) {
+      console.log("Removing Object at index " + ind);
+      this.rrs =  this.rrs.filter(function(e,i) { return i != ind });
       return;
     }
   }
