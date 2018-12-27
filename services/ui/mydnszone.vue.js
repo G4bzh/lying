@@ -5,8 +5,14 @@ export default {
   name: "MyDnsZone",
   template: `
   <div>
+    <md-card>
 
-      Zone {{ $route.params.zone }}
+
+    <md-card-header>
+      <div class="md-title">Zone {{ $route.params.zone }}</div>
+    </md-card-header>
+
+    <md-card-content>
       <div v-for="rr,index in rrs">
           <rr-edit
             v-bind:rrname=rr.name
@@ -14,11 +20,14 @@ export default {
             v-bind:rrclass=rr.class
             v-bind:rrtype=rr.type
             v-bind:rrdata=rr.rdata
-            v-bind:rrindex=index>
+            v-bind:rrindex=index
+            @rr-remove="doRemove">
           </rr-edit>
       </div>
-      <rr-edit></rr-edit>
+      <rr-edit @rr-add="doAdd"></rr-edit>
+    </md-card-content>
 
+    </md-card>
   </div>
   `,
   data: function() {
@@ -59,5 +68,15 @@ export default {
       }
 
     });
+  },
+  methods: {
+    doAdd: function() {
+      console.log("Adding Object");
+      return;
+    },
+    doRemove: function(i) {
+      console.log("Removing Object at index " + i);
+      return;
+    }
   }
 };

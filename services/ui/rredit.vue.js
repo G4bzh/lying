@@ -2,10 +2,11 @@ export default {
   name: "RrEdit",
   template: `
     <div>
-      <md-card class="md-elevation-4">
+      <md-card class="md-elevation-9">
 
         <md-card-actions>
-         <md-button class="md-icon-button md-dense md-raised"><md-icon>clear</md-icon></md-button>
+         <md-button class="md-icon-button md-dense md-raised md-accent" @click="doRemove" v-if="rrindex != undefined"><md-icon >clear</md-icon></md-button>
+         <md-button class="md-icon-button md-dense md-raised md-primary" @click="doAdd" v-else><md-icon >add</md-icon></md-button>
         </md-card-actions>
 
 
@@ -16,7 +17,7 @@ export default {
             <md-input v-model="rrname_" placeholder="Name"></md-input>
            </md-field>
 
-           <md-field class="md-layout-item md-size-5">
+           <md-field class="md-layout-item md-size-10">
             <label>TTL</label>
             <md-input v-model="rrttl_" placeholder="TTL"></md-input>
            </md-field>
@@ -147,6 +148,19 @@ export default {
       rrtype_: this.rrtype,
       rrdata_: this.rrdata
     }
+  },
+  methods: {
+    doRemove: function(event) {
+      console.log(event.currentTarget);
+      console.log("REMOVE");
+      this.$emit('rr-remove', this.rrindex);
+      return;
+    },
+    doAdd: function(event) {
+      console.log(event.currentTarget);
+      console.log("Add");
+      this.$emit('rr-add');
+      return;
+    }
   }
-
 };
