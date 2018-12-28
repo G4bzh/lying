@@ -9,12 +9,12 @@ export default {
 
 
     <md-card-header>
+
       <div class="md-title">Zone {{ $route.params.zone }}</div>
     </md-card-header>
 
     <md-card-content>
 
-    <md-progress-bar md-mode="query" v-show="loading"></md-progress-bar>
 
       <div v-for="rr,index in rrs" :key="rr.name+rr.type+rr.data">
           <rr-edit
@@ -27,7 +27,10 @@ export default {
             @rr-remove="doRemove">
           </rr-edit>
       </div>
-      <rr-edit @rr-add="doAdd"></rr-edit>
+
+      <md-progress-bar md-mode="query" v-if="loading" ></md-progress-bar>
+      <rr-edit @rr-add="doAdd"  v-else></rr-edit>
+
     </md-card-content>
 
     </md-card>
