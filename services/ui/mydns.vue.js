@@ -2,7 +2,7 @@ export default {
   name: "MyDns",
   template: `
   <div>
-    <RouterView></RouterView>
+    <RouterView :key="$route.path"></RouterView>
   </div>
   `,
   data: function() {

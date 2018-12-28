@@ -13,7 +13,7 @@ export default {
     </md-card-header>
 
     <md-card-content>
-      <div v-for="rr,index in rrs">
+      <div v-for="rr,index in rrs" :key="rr.name+rr.type+rr.data">
           <rr-edit
             v-bind:rrname=rr.name
             v-bind:rrttl=rr.ttl
@@ -50,7 +50,6 @@ export default {
     }
   },
   mounted: function () {
-
     axios({
       method: "get",
       headers: {'Authorization' : 'Bearer ' + this.token },
