@@ -151,14 +151,10 @@ export default {
   },
   methods: {
     doRemove: function(event) {
-      console.log(event.currentTarget);
-      console.log("REMOVE");
       this.$emit('rr-remove', this.rrindex);
       return;
     },
     doAdd: function(event) {
-      console.log(event.currentTarget);
-      console.log("Add");
       this.$emit('rr-add');
       return;
     }

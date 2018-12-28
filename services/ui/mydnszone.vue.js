@@ -82,7 +82,6 @@ export default {
       return;
     },
     doRemove: function(ind) {
-      console.log("Removing Object at index " + ind);
       this.rrs =  this.rrs.filter(function(e,i) { return i != ind });
       return;
     }
