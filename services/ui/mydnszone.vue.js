@@ -13,6 +13,9 @@ export default {
     </md-card-header>
 
     <md-card-content>
+
+    <md-progress-bar md-mode="query" v-show="loading"></md-progress-bar>
+
       <div v-for="rr,index in rrs" :key="rr.name+rr.type+rr.data">
           <rr-edit
             v-bind:rrname=rr.name
@@ -32,7 +35,8 @@ export default {
   `,
   data: function() {
     return {
-      rrs : []
+      rrs : [],
+      loading: true
     }
   },
   components: {
@@ -57,6 +61,7 @@ export default {
     }).then(response => {
 
       this.rrs = response.data.rrs;
+      this.loading = false;
 
     }).catch(function (error) {
 
