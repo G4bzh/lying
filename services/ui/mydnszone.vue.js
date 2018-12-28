@@ -29,7 +29,7 @@ export default {
       </div>
 
       <md-progress-bar md-mode="query" v-if="loading" ></md-progress-bar>
-      <rr-edit @rr-add="doAdd"  v-else></rr-edit>
+      <rr-edit @rr-add="doAdd" v-else></rr-edit>
 
     </md-card-content>
 
@@ -77,8 +77,8 @@ export default {
     });
   },
   methods: {
-    doAdd: function() {
-      console.log("Adding Object");
+    doAdd: function(obj) {
+      this.rrs.push(obj);
       return;
     },
     doRemove: function(ind) {

@@ -155,7 +155,20 @@ export default {
       return;
     },
     doAdd: function(event) {
-      this.$emit('rr-add');
+      this.$emit('rr-add',{
+        "name": this.rrname_,
+        "rttl": this.rrttl_,
+        "class": this.rrclass_,
+        "type": this.rrtype_,
+        "rdata": this.rrdata_
+      });
+
+      this.rrname_ = undefined;
+      this.rrttl_ = undefined;
+      this.rrclass_ = undefined;
+      this.rrtype_ = undefined;
+      this.rrdata_ = undefined;
+
       return;
     }
   }
