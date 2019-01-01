@@ -9,14 +9,17 @@ export default {
 
 
     <md-card-header>
-
       <div class="md-title">Zone {{ $route.params.zone }}</div>
     </md-card-header>
+
+    <md-card-actions>
+     <md-button @click="doSave">Save</md-button>
+    </md-card-actions>
 
     <md-card-content>
 
 
-      <div v-for="rr,index in rrs" :key="rr.name+rr.type+rr.data">
+      <div v-for="rr,index in rrs" :key="rr.name+rr.type+rr.data" >
           <rr-edit
             v-bind:rrname=rr.name
             v-bind:rrttl=rr.ttl
@@ -24,6 +27,7 @@ export default {
             v-bind:rrtype=rr.type
             v-bind:rrdata=rr.rdata
             v-bind:rrindex=index
+            ref="rrd"
             @rr-remove="doRemove">
           </rr-edit>
       </div>
@@ -32,6 +36,10 @@ export default {
       <rr-edit @rr-add="doAdd" v-else></rr-edit>
 
     </md-card-content>
+
+    <md-card-actions>
+     <md-button @click="doSave">Save</md-button>
+    </md-card-actions>
 
     </md-card>
   </div>
@@ -84,6 +92,38 @@ export default {
     doRemove: function(ind) {
       this.rrs =  this.rrs.filter(function(e,i) { return i != ind });
       return;
+    },
+    doSave: function() {
+      var o = {domain: this.$route.params.zone, rrs: []}
+      this.$refs.rrd.forEach(function(e) {
+       o.rrs.push({
+         "name":e.rrname_,
+         "type": e.rrtype_,
+         "class": e.rrclass_,
+         "ttl": e.rrttl_,
+         "rdata": e.rrdata_
+       });
+      });
+
+      axios({
+        method: "post",
+        headers: {'Authorization' : 'Bearer ' + this.token },
+        url: URL.GETZONE +  this.$route.params.zone,
+        data: o
+      }).then(response => {
+
+        this.rrs = response.data.rrs;
+
+      }).catch(function (error) {
+
+        if (error.response) {
+          return error.response.data.msg;
+        } else {
+          return "Unexpected Error" + error;
+        }
+
+      });
+
     }
   }
 };

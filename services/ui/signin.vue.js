@@ -77,7 +77,7 @@ export default {
 
         axios({
           method: "post",
-          url: "http://auth.lyingto.me:9080/v1/login",
+          url: URL.SIGNIN,
           data: {
             id: this.id,
             password: this.password
