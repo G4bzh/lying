@@ -100,7 +100,7 @@ export default {
          "name":e.rrname_,
          "type": e.rrtype_,
          "class": e.rrclass_,
-         "ttl": e.rrttl_,
+         "ttl": Number(e.rrttl_),
          "rdata": e.rrdata_
        });
       });
